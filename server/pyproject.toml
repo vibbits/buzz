@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "buzz"
+version = "0.1.0"
+description = ""
+authors = ["James Collier <james.collier@vib.be>"]
+license = "MIT"
+readme = "README.md"
+packages = [{ include = "app" }]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.94.1"
+sqlalchemy = "^2.0.6"
+websockets = "^10.4"
+uvicorn = "^0.21.0"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+httpx = "^0.23.3"
+rich = "^13.3.2"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.1.0"
+pylint = "^2.17.0"
+mypy = "^1.1.1"
+
+[tool.poetry.scripts]
+setup = "app.database:build"
+start = "app.main:main"
+admin = "app.database:admin"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.mypy]
+ignore_missing_imports = true
