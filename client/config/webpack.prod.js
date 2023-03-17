@@ -3,13 +3,9 @@ const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
-  mode: "development",
+  mode: "production",
   entry: "./src/index.tsx",
   devtool: "inline-source-map",
-  devServer: {
-    static: "./dist",
-    historyApiFallback: true,
-  },
   resolve: {
     extensions: [".js", ".jsx", ".ts", ".tsx"],
   },
@@ -20,12 +16,12 @@ module.exports = {
       favicon: "src/buzz.svg",
     }),
     new webpack.DefinePlugin({
-      SERVICE_URL: JSON.stringify("http://localhost:8000"),
-      WEBSOCKET_URL: JSON.stringify("ws://localhost:8000/ws"),
+      SERVICE_URL: JSON.stringify("https://buzz.vib.be/api/v1"),
+      WEBSOCKET_URL: JSON.stringify("wss://buzz.vib.be/api/v1/ws"),
     }),
   ],
   output: {
-    path: path.resolve(__dirname, "./dist"),
+    path: path.resolve(__dirname, "../dist"),
     filename: "[name].bundle.js",
     clean: true,
   },

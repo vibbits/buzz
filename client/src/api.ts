@@ -4,6 +4,7 @@ import type { FetchArgs } from "@reduxjs/toolkit/query";
 import { RootState } from "./store";
 
 declare const SERVICE_URL: string;
+declare const WEBSOCKET_URL: string;
 
 export type User = {
   id: number;
@@ -52,7 +53,7 @@ type Message = AuthMessage | NewPollMessage | PollVoteMessage;
 let socket: WebSocket | null = null;
 export const getSocket = (): WebSocket => {
   if (!socket) {
-    socket = new WebSocket(`ws://localhost:8000/ws`);
+    socket = new WebSocket(`${WEBSOCKET_URL}`);
   }
   return socket;
 };
