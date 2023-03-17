@@ -1,5 +1,6 @@
 " Realtime communication between clients "
 
+import asyncio
 from json import JSONDecodeError
 from uuid import uuid4 as uuid
 from uuid import UUID
@@ -8,6 +9,7 @@ from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from sqlalchemy.orm import Session
 
 from app import deps, polls
+from app.authorization import user_from_token, AuthorizationError
 from app.schemas import User
 
 
@@ -76,14 +78,21 @@ dispatch = {
 async def realtime_comms(
     websocket: WebSocket,
     database: Session = Depends(deps.get_db),
-    user: User = Depends(deps.current_user),
 ):
     await websocket.accept()
-    client = Client(websocket, name=f"{user.first_name} {user.last_name}")
-    await broadcast(connected(client))
-    connected_clients[str(client.id)] = client
+    await asyncio.sleep(1)
+    client = None
 
     try:
+        # First, request the bearer token.
+        await websocket.send_json({"msg": "auth"})
+        token = await websocket.receive_json()
+        user = user_from_token(token["bearer"])
+
+        client = Client(websocket, name=f"{user.first_name} {user.last_name}")
+        await broadcast(connected(client))
+        connected_clients[str(client.id)] = client
+
         while True:
             message = await websocket.receive_json()
             (role, fn) = dispatch[message["msg"]]
@@ -106,12 +115,17 @@ async def realtime_comms(
                     )
                 )
     except WebSocketDisconnect:
-        del connected_clients[str(client.id)]
-        await broadcast(disconnected(client))
+        if client is not None:
+            del connected_clients[str(client.id)]
+            await broadcast(disconnected(client))
     except (JSONDecodeError, KeyError):
-        del connected_clients[str(client.id)]
         await websocket.close()
-        await broadcast(disconnected(client))
+        if client is not None:
+            del connected_clients[str(client.id)]
+            await broadcast(disconnected(client))
+    except AuthorizationError as err:
+        await websocket.send_json(error_msg(str(err)))
+        await websocket.close()
 
 
 @router.websocket("/debug")

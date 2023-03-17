@@ -14,6 +14,11 @@ export const auth = createSlice({
   reducers: {
     setAuth: (state, action: PayloadAction<string>) => {
       state.token = action.payload;
+      window.localStorage.setItem("token", JSON.stringify(action.payload));
+    },
+    loggedOut: (state) => {
+      state.token = null;
+      window.localStorage.removeItem("token");
     },
   },
 });

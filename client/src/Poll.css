@@ -1,0 +1,7 @@
+li.poll-button {
+  margin: 10px 0;
+}
+
+li.poll-button:hover {
+  background: #ddd;
+}

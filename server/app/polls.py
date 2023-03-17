@@ -1,5 +1,7 @@
 " Poll control functions and HTTP API "
 
+from itertools import groupby
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -13,7 +15,21 @@ router = APIRouter()
 async def get_polls(
     database: Session = Depends(deps.get_db), _user: User = Depends(deps.current_user)
 ):
-    return [Poll.from_orm(poll) for poll in crud.all_polls(database)]
+    def make_poll(poll):
+        options = [(opt.text, opt.id) for opt in poll.options]
+        votes = {
+            id: len(list(vals))
+            for (id, vals) in groupby(sorted(vote.option for vote in poll.votes))
+        }
+        return Poll(
+            id=poll.id,
+            title=poll.title,
+            description=poll.description,
+            options=options,
+            votes=votes,
+        )
+
+    return [make_poll(poll) for poll in crud.all_polls(database)]
 
 
 def create_new_poll(

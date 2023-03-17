@@ -24,7 +24,6 @@ export const LoginRedirect: React.FC<{}> = () => {
   useEffect(() => {
     if (!data) return;
 
-    window.localStorage.setItem("token", JSON.stringify(data));
     dispatch(auth.actions.setAuth(data));
   }, [dispatch, data]);
 
@@ -36,7 +35,14 @@ export const LoginRedirect: React.FC<{}> = () => {
 };
 
 const UserAuthenticatedButtons: React.FC<{}> = () => {
-  const { data } = useMeQuery();
+  const dispatch = useAppDispatch();
+  const { data, error } = useMeQuery();
+
+  useEffect(() => {
+    if (error) {
+      dispatch(auth.actions.loggedOut());
+    }
+  }, [error]);
 
   if (data) {
     return (

@@ -32,30 +32,10 @@ class AuthorizationCode(BaseModel):
 # Polls
 
 
-class PollOption(BaseModel):
-    "A Poll option"
-    id: int
-    text: str
-
-    class Config:
-        orm_mode = True
-
-
-class PollVote(BaseModel):
-    "A single vote on a poll"
-    option: int
-
-    class Config:
-        orm_mode = True
-
-
 class Poll(BaseModel):
     "A Poll description"
     id: int
     title: str
     description: str
-    options: list[PollOption]
-    votes: list[PollVote]
-
-    class Config:
-        orm_mode = True
+    options: list[tuple[str, int]]
+    votes: dict[int, int]

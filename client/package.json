@@ -20,11 +20,13 @@
   "dependencies": {
     "@reduxjs/toolkit": "^1.9.3",
     "@vibbioinfocore/vib-css": "^0.2.1",
+    "ramda": "^0.28.0",
     "react": "^18.2.0",
     "react-redux": "^8.0.5",
     "react-router-dom": "^6.9.0"
   },
   "devDependencies": {
+    "@types/ramda": "^0.28.23",
     "@types/react-dom": "^18.0.11",
     "@types/react-redux": "^7.1.25",
     "@typescript-eslint/eslint-plugin": "^5.55.0",

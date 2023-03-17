@@ -40,7 +40,12 @@ const AppHeader = () => {
         <AuthButtons />
       </div>
       <nav className="vib-nav">
-        <img className="vib-app-logo" src={Logo} alt="TTFD Logo" />
+        <img
+          className="vib-app-logo"
+          src={Logo}
+          alt="Buzz Logo"
+          style={{ maxHeight: "90px" }}
+        />
 
         <input type="checkbox" id="vib-toggle-menu" />
         <label className="vib-menu-toggle-button" htmlFor="vib-toggle-menu">
