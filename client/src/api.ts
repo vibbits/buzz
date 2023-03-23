@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery, retry } from "@reduxjs/toolkit/query/react";
 import type { FetchArgs } from "@reduxjs/toolkit/query";
+import * as R from "ramda";
 
 import { RootState } from "./store";
 
@@ -31,10 +32,10 @@ export type Poll = {
 
 type NewPollMessage = {
   msg: "new_poll";
-  id?: number;
+  id: number;
   title: string;
   description: string;
-  options: Array<[text: string, id?: number]>;
+  options: Array<[text: string, id: number]>;
 };
 
 type PollVoteMessage = {
@@ -125,13 +126,27 @@ export const api = createApi({
                 );
                 break;
               }
+              case "new_poll": {
+                updateCachedData(
+                  R.prepend({
+                    id: message.id,
+                    title: message.title,
+                    description: message.description,
+                    options: message.options,
+                    votes: {},
+                  })
+                );
+                break;
+              }
               case "poll_vote": {
                 updateCachedData((draft) => {
                   const i = draft.map((poll) => poll.id).indexOf(message.poll);
                   const poll = draft[i];
-                  if (poll) {
-                    if (poll.votes[message.option]) {
+                  if (poll !== undefined) {
+                    if (poll.votes[message.option] !== undefined) {
                       poll.votes[message.option]++;
+                    } else {
+                      poll.votes[message.option] = 1;
                     }
                   }
                   return draft;

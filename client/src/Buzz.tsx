@@ -1,28 +1,166 @@
-import React from "react";
+import React, { useState } from "react";
 
-import { getSocket, Poll, usePollsQuery } from "./api";
+import * as R from "ramda";
+
+import { getSocket, Poll, useMeQuery, usePollsQuery } from "./api";
 import { useAppSelector } from "./store";
 import { Welcome } from "./Welcome";
 import { Poll as ViewPoll } from "./Poll";
 
+const selectPollOption = (poll: number) => (option: number) => () => {
+  const socket = getSocket();
+  socket.send(
+    JSON.stringify({
+      msg: "poll_vote",
+      poll,
+      option,
+    })
+  );
+};
+
+const createPoll = (title: string, description: string, options: string[]) => {
+  const socket = getSocket();
+  socket.send(JSON.stringify({ msg: "new_poll", title, description, options }));
+};
+
+type CreatePollOptionProps = {
+  index: number;
+  option: string | null;
+  big: boolean;
+  add: () => void;
+  set: (index: number, value: string | null) => void;
+  remove: (index: number) => void;
+};
+
+const CreatePollOption: React.FC<CreatePollOptionProps> = (props) => {
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "3px",
+        alignItems: "start",
+      }}
+    >
+      <label htmlFor={`option-${props.index}`}>
+        Poll option {`${props.index + 1}`}
+      </label>
+      <input
+        id={`create-option-${props.index}`}
+        type="text"
+        placeholder={`Option ${props.index + 1}`}
+        value={props.option === null ? "" : props.option}
+        onChange={(e) =>
+          props.set(props.index, e.target.value === "" ? null : e.target.value)
+        }
+      />
+      {props.big ? (
+        <button onClick={() => props.remove(props.index)}>Remove option</button>
+      ) : (
+        <></>
+      )}
+    </div>
+  );
+};
+
+type CreatePollOptionsProps = {
+  options: (string | null)[];
+  modify: React.Dispatch<React.SetStateAction<(string | null)[]>>;
+};
+
+const CreatePollOptions: React.FC<CreatePollOptionsProps> = ({
+  options,
+  modify,
+}) => {
+  const remove = (index: number) => {
+    modify(R.remove(index, 1));
+  };
+
+  const setValue = (index: number, value: string | null) => {
+    modify(R.adjust<string | null>(index, R.always(value)));
+  };
+
+  const add = () => {
+    modify(R.append<string | null>(null));
+  };
+
+  return (
+    <div>
+      {options.map((option, i) => (
+        <CreatePollOption
+          key={`option-${i}`}
+          index={i}
+          option={option}
+          big={options.length > 2}
+          add={add}
+          set={setValue}
+          remove={remove}
+        />
+      ))}
+      <button onClick={add}>Add option</button>
+    </div>
+  );
+};
+
+const CreatePollButton: React.FC<{}> = () => {
+  const [pressed, setPressed] = useState(false);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [options, setOptions] = useState<Array<string | null>>([null, null]);
+
+  if (pressed) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "10px",
+        }}
+      >
+        <input
+          type="text"
+          placeholder="title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+        <CreatePollOptions options={options} modify={setOptions} />
+        <div>
+          <button onClick={() => setPressed(false)}>Cancel</button>
+          <button
+            onClick={() => {
+              setPressed(false);
+              createPoll(
+                title,
+                description,
+                options.filter((o) => o !== null) as string[]
+              );
+            }}
+          >
+            Create Poll
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return <button onClick={() => setPressed(true)}>Create Poll</button>;
+};
+
 const PollApp: React.FC<{}> = () => {
   const { data } = usePollsQuery();
-
-  const socket = getSocket();
-
-  const select = (poll: number) => (option: number) => () => {
-    socket.send(
-      JSON.stringify({
-        msg: "poll_vote",
-        poll,
-        option,
-      })
-    );
-  };
+  const me = useMeQuery();
 
   return (
     <div style={{ flex: "1", textAlign: "center" }}>
       <h2>Polls</h2>
+      {me?.data?.role === "admin" ? <CreatePollButton /> : <></>}
       <div
         style={{
           display: "flex",
@@ -38,7 +176,7 @@ const PollApp: React.FC<{}> = () => {
             description={poll.description}
             options={poll.options}
             votes={poll.votes}
-            selectOption={select(poll.id)}
+            selectOption={selectPollOption(poll.id)}
           />
         ))}
       </div>

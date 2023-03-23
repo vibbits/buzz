@@ -88,7 +88,7 @@ def create_new_poll(
         "id": poll.id,
         "title": title,
         "description": description,
-        "options": [(opt.id, opt.text) for opt in final_options],
+        "options": [(opt.text, opt.id) for opt in final_options],
     }
 
 
