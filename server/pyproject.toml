@@ -12,10 +12,12 @@ python = "^3.11"
 fastapi = "^0.94.1"
 sqlalchemy = "^2.0.6"
 websockets = "^10.4"
-uvicorn = "^0.21.0"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 httpx = "^0.23.3"
 rich = "^13.3.2"
+alembic = "^1.10.2"
+hypercorn = "^0.14.3"
+uvicorn = "^0.21.1"
 
 
 [tool.poetry.group.dev.dependencies]

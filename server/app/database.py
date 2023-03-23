@@ -7,10 +7,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app import crud
+from app.config import settings
 from app.models import Base, User
 
 engine = create_engine(
-    "sqlite:///voting.sqlite",
+    settings.database_uri,
     future=True,
     echo=False,
     connect_args={"check_same_thread": False},
