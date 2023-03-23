@@ -7,6 +7,7 @@ from fastapi import APIRouter, FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 
 from app import auth, polls, realtime
+from app.config import settings
 
 app = FastAPI()
 
@@ -24,6 +25,9 @@ router.include_router(polls.router, prefix="/poll")
 router.include_router(realtime.router)
 
 app.include_router(router)
+
+print("SETTINGS FOR THIS SESSION:")
+print(settings.dict())
 
 
 def main() -> None:
