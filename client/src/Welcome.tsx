@@ -29,7 +29,7 @@ export const Welcome: React.FC<{}> = () => {
       >
         <img style={{ borderRadius: "8px 8px 0 0" }} src={WelcomeImage} />
         <a
-          href={`${SERVICE_URL}/auth/login`}
+          href={`${SERVICE_URL}/auth/login?redirect=${window.location.origin}/login_redirect`}
           className="background-cyan"
           style={{
             marginBottom: "15px",

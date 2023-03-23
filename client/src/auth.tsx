@@ -74,7 +74,10 @@ export const AuthButtons: React.FC<{}> = () => {
   } else {
     return (
       <div className="vib-auth">
-        <a className="vib-auth-button" href={`${SERVICE_URL}/auth/login`}>
+        <a
+          className="vib-auth-button"
+          href={`${SERVICE_URL}/auth/login?redirect=${window.location.origin}/login_redirect`}
+        >
           Login
         </a>
       </div>

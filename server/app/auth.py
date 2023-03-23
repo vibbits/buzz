@@ -19,10 +19,10 @@ router = APIRouter()
 
 
 @router.get("/login")
-async def login_redirect():
+async def login_redirect(redirect: str):
     params = {
         "client_id": "training_vote",
-        "redirect_uri": "http://localhost:8080/login_redirect",
+        "redirect_uri": redirect,
         "response_type": "code",
         "scope": "openid profile",
         "state": "null",
