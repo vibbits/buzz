@@ -1,12 +1,13 @@
 " User authentication with VIB Services "
 
+from calendar import timegm
 from datetime import datetime, timedelta, timezone
+import json
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import RedirectResponse
-import httpx
-from jose import jwt
+from jose import jws, jwt
 from jose.exceptions import ExpiredSignatureError, JWTClaimsError, JWTError
 
 from app import crud, deps
@@ -49,6 +50,14 @@ async def get_bearer_token(
             detail=f"Fetching token: {tkn['error']}",
         )
 
+    print(timegm(datetime.utcnow().utctimetuple()))
+    print(
+        json.loads(
+            jws.verify(tkn["id_token"], keys, None, verify_signature=False).decode(
+                "utf-8"
+            )
+        )
+    )
     try:
         id_token = jwt.decode(
             tkn["id_token"],
