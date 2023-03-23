@@ -10,7 +10,7 @@ Token = dict[str, str]
 Jwks = dict[str, str]
 
 
-async def token(code: str) -> tuple[Token, Jwks]:
+async def token(code: str, redirect: str) -> tuple[Token, Jwks]:
     async with httpx.AsyncClient() as client:
         [tkn, jwks] = await asyncio.gather(
             asyncio.ensure_future(
@@ -23,7 +23,7 @@ async def token(code: str) -> tuple[Token, Jwks]:
                         "code": code,
                         "state": "",
                         "scope": "openid profile email userroles roles",
-                        "redirect_uri": "http://localhost:8080/login_redirect",
+                        "redirect_uri": redirect,
                     },
                 )
             ),

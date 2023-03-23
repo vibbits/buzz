@@ -19,7 +19,10 @@ export const LoginRedirect: React.FC<{}> = () => {
   const [authToken] = useAppSelector((state) => [state.auth.token]);
 
   const code = searchParams.get("code");
-  const { data } = useTokenQuery(code!);
+  const { data } = useTokenQuery({
+    code: code!,
+    redirect: `${window.location.origin}/login_redirect`,
+  });
 
   useEffect(() => {
     if (!data) return;

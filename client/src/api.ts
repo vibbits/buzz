@@ -14,6 +14,11 @@ export type User = {
   image: string | null;
 };
 
+export type TokenRequest = {
+  code: string;
+  redirect: string;
+};
+
 export type PollOption = [text: string, id: number];
 
 export type Poll = {
@@ -84,11 +89,11 @@ const baseQuery = retry(
 export const api = createApi({
   baseQuery,
   endpoints: (builder) => ({
-    token: builder.query<string, string>({
-      query: (code: string) => ({
+    token: builder.query<string, TokenRequest>({
+      query: ({ code, redirect }) => ({
         url: "/auth/token",
         method: "POST",
-        body: { code },
+        body: { code, redirect },
       }),
       transformResponse: (response: { access_token: string }) =>
         response.access_token,

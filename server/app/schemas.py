@@ -27,6 +27,7 @@ class Token(BaseModel):
 class AuthorizationCode(BaseModel):
     "The result of a login using the OpenID Connect Authorization Code flow."
     code: str
+    redirect: str
 
 
 # Polls

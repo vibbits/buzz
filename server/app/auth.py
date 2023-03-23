@@ -42,7 +42,7 @@ def create_access_token(user: dict[str, str]) -> str:
 async def get_bearer_token(
     body: AuthorizationCode, database: Session = Depends(deps.get_db)
 ) -> Token:
-    (tkn, keys) = await token(body.code)
+    (tkn, keys) = await token(body.code, body.redirect)
     if "error" in tkn:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
