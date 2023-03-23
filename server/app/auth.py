@@ -50,18 +50,13 @@ async def get_bearer_token(
             detail=f"Fetching token: {tkn['error']}",
         )
 
-    print(timegm(datetime.utcnow().utctimetuple()))
-    print(
-        json.loads(
-            jws.verify(tkn["id_token"], keys, None, verify=False).decode("utf-8")
-        )
-    )
     try:
         id_token = jwt.decode(
             tkn["id_token"],
             keys,
             audience="training_vote",
             access_token=tkn["access_token"],
+            options={"leeway": 30},
         )
     except (ExpiredSignatureError, JWTClaimsError, JWTError) as err:
         raise HTTPException(
