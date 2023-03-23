@@ -53,9 +53,7 @@ async def get_bearer_token(
     print(timegm(datetime.utcnow().utctimetuple()))
     print(
         json.loads(
-            jws.verify(tkn["id_token"], keys, None, verify_signature=False).decode(
-                "utf-8"
-            )
+            jws.verify(tkn["id_token"], keys, None, verify=False).decode("utf-8")
         )
     )
     try:
