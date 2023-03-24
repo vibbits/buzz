@@ -4,8 +4,6 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
-const BundleAnalyzerPlugin =
-  require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 module.exports = {
   mode: "production",
@@ -25,7 +23,6 @@ module.exports = {
       WEBSOCKET_URL: JSON.stringify("wss://buzz.vib.be/api/v1/ws"),
     }),
     new MiniCssExtractPlugin(),
-    new BundleAnalyzerPlugin(),
   ],
   optimization: {
     minimize: true,
