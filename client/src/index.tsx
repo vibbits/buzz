@@ -73,9 +73,9 @@ const AppFooter = () => {
       <div className="footer-r">
         <h3>About</h3>
         <div>
-          © <a href="https://vib.be">VIB</a> 2022.
+          © <a href="https://vib.be">VIB</a> Technology Training 2023.
         </div>
-        <div style={{ marginTop: "2rem" }}>Buzz.</div>
+        <div style={{ marginTop: "2rem" }}>Buzz @ VIB Technology Training</div>
       </div>
     </footer>
   );

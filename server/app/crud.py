@@ -3,6 +3,7 @@
 from typing import Optional
 from datetime import datetime, timezone
 
+from sqlalchemy import desc
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
@@ -55,7 +56,7 @@ def promote(database: Session, uid: int):
 
 
 def all_polls(database: Session):
-    return database.query(Poll).all()
+    return database.query(Poll).order_by(desc(Poll.created)).all()
 
 
 def create_new_poll(
@@ -90,6 +91,16 @@ def create_new_poll(
         "description": description,
         "options": [(opt.text, opt.id) for opt in final_options],
     }
+
+
+def delete_poll(database: Session, poll: int):
+    the_poll = database.query(Poll).filter(Poll.id == poll).one_or_none()
+    if the_poll is not None:
+        database.delete(the_poll)
+        database.commit()
+        return {"poll_id": poll}
+
+    return {}
 
 
 def poll_vote(database: Session, uid: int, poll: int, option: int):

@@ -35,8 +35,10 @@ class Poll(Base):
     created = mapped_column(DateTime, nullable=False)
     title = mapped_column(String, nullable=False)
     description = mapped_column(String)
-    options: Mapped[list["PollOption"]] = relationship()
-    votes: Mapped[list["PollVote"]] = relationship()
+    options: Mapped[list["PollOption"]] = relationship(
+        "PollOption", cascade="all, delete"
+    )
+    votes: Mapped[list["PollVote"]] = relationship("PollVote", cascade="all, delete")
 
 
 class PollOption(Base):

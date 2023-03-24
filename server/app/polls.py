@@ -38,5 +38,9 @@ def create_new_poll(
     return crud.create_new_poll(database, title, description, options)
 
 
+def delete_poll(database: Session, _uid: int, poll_id: int):
+    return crud.delete_poll(database, poll_id)
+
+
 def vote(database: Session, uid: int, poll: int, option: int):
     return crud.poll_vote(database, uid, poll, option)

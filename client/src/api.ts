@@ -38,6 +38,11 @@ type NewPollMessage = {
   options: Array<[text: string, id: number]>;
 };
 
+type DeletePollMessage = {
+  msg: "delete_poll";
+  poll_id?: number;
+};
+
 type PollVoteMessage = {
   msg: "poll_vote";
   poll: number;
@@ -54,7 +59,11 @@ const authMessage = (token: string): AuthMessage => ({
   bearer: token,
 });
 
-type Message = AuthMessage | NewPollMessage | PollVoteMessage;
+type Message =
+  | AuthMessage
+  | NewPollMessage
+  | DeletePollMessage
+  | PollVoteMessage;
 
 let socket: WebSocket | null = null;
 export const getSocket = (): WebSocket => {
@@ -136,6 +145,14 @@ export const api = createApi({
                     votes: {},
                   })
                 );
+                break;
+              }
+              case "delete_poll": {
+                if (message.poll_id !== undefined) {
+                  updateCachedData(
+                    R.filter((poll: Poll) => poll.id !== message.poll_id)
+                  );
+                }
                 break;
               }
               case "poll_vote": {

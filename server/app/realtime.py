@@ -70,6 +70,7 @@ def conn_info() -> Message:
 
 dispatch = {
     "new_poll": ("admin", polls.create_new_poll),
+    "delete_poll": ("admin", polls.delete_poll),
     "poll_vote": ("user", polls.vote),
 }
 

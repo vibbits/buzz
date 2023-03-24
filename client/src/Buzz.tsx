@@ -6,6 +6,7 @@ import { getSocket, Poll, useMeQuery, usePollsQuery } from "./api";
 import { useAppSelector } from "./store";
 import { Welcome } from "./Welcome";
 import { Poll as ViewPoll } from "./Poll";
+import "./Poll.css";
 
 const selectPollOption = (poll: number) => (option: number) => () => {
   const socket = getSocket();
@@ -21,6 +22,11 @@ const selectPollOption = (poll: number) => (option: number) => () => {
 const createPoll = (title: string, description: string, options: string[]) => {
   const socket = getSocket();
   socket.send(JSON.stringify({ msg: "new_poll", title, description, options }));
+};
+
+const deletePoll = (poll_id: number) => {
+  const socket = getSocket();
+  socket.send(JSON.stringify({ msg: "delete_poll", poll_id }));
 };
 
 type CreatePollOptionProps = {
@@ -55,7 +61,13 @@ const CreatePollOption: React.FC<CreatePollOptionProps> = (props) => {
         }
       />
       {props.big ? (
-        <button onClick={() => props.remove(props.index)}>Remove option</button>
+        <button
+          className="flat-ui-button"
+          style={{ color: "red" }}
+          onClick={() => props.remove(props.index)}
+        >
+          Remove option
+        </button>
       ) : (
         <></>
       )}
@@ -153,6 +165,24 @@ const CreatePollButton: React.FC<{}> = () => {
   return <button onClick={() => setPressed(true)}>Create Poll</button>;
 };
 
+const DeletePollButton: React.FC<{ pollID: number }> = ({ pollID }) => {
+  const { data } = useMeQuery();
+
+  if (data && data.role === "admin") {
+    return (
+      <button
+        className="flat-ui-button"
+        style={{ position: "absolute", right: "0" }}
+        onClick={() => deletePoll(pollID)}
+      >
+        ❌
+      </button>
+    );
+  }
+
+  return <></>;
+};
+
 const PollApp: React.FC<{}> = () => {
   const { data } = usePollsQuery();
   const me = useMeQuery();
@@ -177,7 +207,9 @@ const PollApp: React.FC<{}> = () => {
             options={poll.options}
             votes={poll.votes}
             selectOption={selectPollOption(poll.id)}
-          />
+          >
+            <DeletePollButton pollID={poll.id} />
+          </ViewPoll>
         ))}
       </div>
     </div>

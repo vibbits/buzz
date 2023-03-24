@@ -12,7 +12,7 @@ type PollProps = {
   selectOption: (option: number) => () => void;
 };
 
-export const Poll: React.FC<PollProps> = (props) => {
+export const Poll: React.FC<React.PropsWithChildren<PollProps>> = (props) => {
   const maxVotes: number = R.values(props.votes).reduce(
     (a: number, b: number): number => Math.max(a, b),
     0
@@ -26,8 +26,10 @@ export const Poll: React.FC<PollProps> = (props) => {
         paddingBottom: "15px",
         boxShadow: "0 1px 4px rgb(0 21 41 / 12%)",
         background: "white",
+        position: "relative",
       }}
     >
+      {props.children}
       <h3>{props.title}</h3>
       <p>{props.description}</p>
       <ul style={{ textAlign: "left", listStyle: "none" }}>
