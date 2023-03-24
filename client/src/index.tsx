@@ -11,7 +11,7 @@ import { Provider } from "react-redux";
 import { store } from "./store";
 import { ErrorPage } from "./error-page";
 import { AuthButtons, LoginRedirect } from "./auth";
-import { Buzz } from "./Buzz";
+const Buzz = React.lazy(() => import("./Buzz"));
 
 import "@vibbioinfocore/vib-css";
 import Logo from "./buzz.svg";
@@ -34,7 +34,7 @@ const AppHeader = () => {
             />
           </a>
           <Link className="breadcrumb" to="/">
-            Buzz @ VIB Training
+            Buzz @ VIB Technology Training
           </Link>
         </div>
         <AuthButtons />
@@ -104,7 +104,16 @@ const router = createBrowserRouter([
     path: "/",
     element: <App />,
     errorElement: <ErrorPage />,
-    children: [{ path: "/", element: <Buzz /> }],
+    children: [
+      {
+        path: "/",
+        element: (
+          <React.Suspense fallback={<>loading...</>}>
+            <Buzz />
+          </React.Suspense>
+        ),
+      },
+    ],
   },
   {
     path: "/login_redirect",

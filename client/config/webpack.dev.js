@@ -15,7 +15,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      title: "VIB Training: Buzz",
+      title: "Buzz @ VIB Technology Training",
       template: "src/index.html",
       favicon: "src/buzz.svg",
     }),

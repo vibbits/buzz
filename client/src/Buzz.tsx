@@ -192,7 +192,7 @@ const QAApp: React.FC<{}> = () => {
   );
 };
 
-export const Buzz: React.FC<{}> = () => {
+export default () => {
   const isAuthorized: boolean = useAppSelector(
     (state) => state.auth.token !== null
   );
