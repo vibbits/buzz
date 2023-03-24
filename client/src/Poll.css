@@ -5,9 +5,3 @@ li.poll-button {
 li.poll-button:hover {
   background: #ddd;
 }
-
-button.flat-ui-button {
-  cursor: pointer;
-  background-color: transparent;
-  border: none;
-}

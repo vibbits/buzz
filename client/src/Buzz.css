@@ -1,0 +1,65 @@
+.vib-main {
+  padding: 0 !important;
+}
+
+button.flat-ui-button {
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+}
+
+div.buzz-ui-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  align-items: stretch;
+  width: 100%;
+}
+
+section.app-container {
+  flex: 1;
+  text-align: center;
+  width: 100%;
+}
+
+.buttons-container {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.buttons-container > * {
+  flex-grow: 1;
+  transition: all 0.3s linear;
+}
+
+.buttons-container .button-enabled {
+  background: #bbb;
+  border-radius: 10px;
+}
+
+@media only screen and (min-width: 990px) {
+  div.buzz-ui-container {
+    flex-direction: row;
+    text-align: center;
+    gap: 5px;
+  }
+
+  .hide-on-desktop {
+    display: none;
+    max-hieght: 0;
+    overflow: hidden;
+  }
+
+  .vib-main {
+    padding: 1rem !important;
+  }
+}
+
+@media only screen and (max-width: 990px) {
+  .hide-on-mobile {
+    display: none;
+    max-height: 0;
+    overflow: hidden;
+  }
+}

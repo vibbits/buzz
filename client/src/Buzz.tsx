@@ -6,7 +6,8 @@ import { getSocket, Poll, useMeQuery, usePollsQuery } from "./api";
 import { useAppSelector } from "./store";
 import { Welcome } from "./Welcome";
 import { Poll as ViewPoll } from "./Poll";
-import "./Poll.css";
+import { ButtonTab } from "./ButtonTab";
+import "./Buzz.css";
 
 const selectPollOption = (poll: number) => (option: number) => () => {
   const socket = getSocket();
@@ -183,13 +184,13 @@ const DeletePollButton: React.FC<{ pollID: number }> = ({ pollID }) => {
   return <></>;
 };
 
-const PollApp: React.FC<{}> = () => {
+const PollApp: React.FC<{ cn: string }> = ({ cn }) => {
   const { data } = usePollsQuery();
   const me = useMeQuery();
 
   return (
-    <div style={{ flex: "1", textAlign: "center" }}>
-      <h2>Polls</h2>
+    <section className={`app-container ${cn}`}>
+      <h2 className="hide-on-mobile">Polls</h2>
       {me?.data?.role === "admin" ? <CreatePollButton /> : <></>}
       <div
         style={{
@@ -212,19 +213,20 @@ const PollApp: React.FC<{}> = () => {
           </ViewPoll>
         ))}
       </div>
-    </div>
+    </section>
   );
 };
 
-const QAApp: React.FC<{}> = () => {
+const QAApp: React.FC<{ cn: string }> = ({ cn }) => {
   return (
-    <div style={{ flex: "1", textAlign: "center" }}>
-      <h2>Q&A</h2>
-    </div>
+    <section className={`app-container ${cn}`}>
+      <h2 className="hide-on-mobile">Q&A</h2>
+    </section>
   );
 };
 
 export default () => {
+  const [whichApp, setWhichApp] = useState<"poll" | "qa">("poll");
   const isAuthorized: boolean = useAppSelector(
     (state) => state.auth.token !== null
   );
@@ -233,18 +235,11 @@ export default () => {
     return <Welcome />;
   }
   return (
-    <section
-      style={{
-        display: "flex",
-        flexDirection: "row",
-        flex: "1",
-        minHeight: "600px",
-        gap: "6px",
-      }}
-    >
-      <PollApp />
+    <div className="buzz-ui-container">
+      <ButtonTab app={whichApp} change={setWhichApp} />
+      <PollApp cn={whichApp !== "poll" ? "hide-on-mobile" : ""} />
       <div style={{ width: "2px", background: "#ccc" }}></div>
-      <QAApp />
-    </section>
+      <QAApp cn={whichApp !== "qa" ? "hide-on-mobile" : ""} />
+    </div>
   );
 };
