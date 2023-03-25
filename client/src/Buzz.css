@@ -26,6 +26,9 @@ section.app-container {
   display: flex;
   flex-direction: row;
   align-items: stretch;
+  width: 100%;
+  margin-bottom: 1rem;
+  height: 60px;
 }
 
 .buttons-container > * {
@@ -34,8 +37,18 @@ section.app-container {
 }
 
 .buttons-container .button-enabled {
+}
+
+.buttons-container .button-disabled {
   background: #bbb;
-  border-radius: 10px;
+}
+
+.inset-shadow-left {
+  box-shadow: inset 10px -10px 10px -10px #777;
+}
+
+.inset-shadow-right {
+  box-shadow: inset -10px -10px 10px -10px #777;
 }
 
 @media only screen and (min-width: 990px) {

@@ -9,14 +9,13 @@ export type ButtonTabProps = {
 
 export const ButtonTab: React.FC<ButtonTabProps> = ({ app, change }) => {
   return (
-    <div
-      className="buttons-container hide-on-desktop"
-      style={{ width: "100%", height: "55px" }}
-    >
+    <div className="buttons-container hide-on-desktop">
       <button
         disabled={app === "poll"}
         className={`flat-ui-button ${
-          app === "poll" ? "button-enabled" : "button-disabled"
+          app === "poll"
+            ? "button-enabled"
+            : "button-disabled inset-shadow-right"
         }`}
         onClick={() => change("poll")}
       >
@@ -25,7 +24,7 @@ export const ButtonTab: React.FC<ButtonTabProps> = ({ app, change }) => {
       <button
         disabled={app === "qa"}
         className={`flat-ui-button ${
-          app === "qa" ? "button-enabled" : "button-disabled"
+          app === "qa" ? "button-enabled" : "button-disabled inset-shadow-left"
         }`}
         onClick={() => change("qa")}
       >
