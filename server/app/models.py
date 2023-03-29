@@ -69,6 +69,10 @@ class Question(Base):
     votes = mapped_column(Integer, nullable=False)
     created = mapped_column(DateTime, nullable=False)
     user = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    asker: Mapped[User] = relationship("User")
+    comments: Mapped[list["QuestionComment"]] = relationship(
+        "QuestionComment", cascade="all, delete"
+    )
 
 
 class QuestionComment(Base):
@@ -80,3 +84,4 @@ class QuestionComment(Base):
     text = mapped_column(String, nullable=False)
     question = mapped_column(Integer, ForeignKey("questions.id"), nullable=False)
     user = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    commenter: Mapped[User] = relationship("User")

@@ -7,7 +7,8 @@ from sqlalchemy import desc
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app.models import User, Poll, PollOption, PollVote
+from app import schemas
+from app.models import User, Poll, PollOption, PollVote, Question
 
 # Auth
 
@@ -115,3 +116,36 @@ def poll_vote(database: Session, uid: int, poll: int, option: int):
         database.commit()
 
     return {"poll": poll, "option": option}
+
+
+# Discussions / Q&A
+
+
+def all_discussions(database: Session):
+    return (
+        database.query(Question)
+        .order_by(desc(Question.created), desc(Question.votes))
+        .all()
+    )
+
+
+def create_new_discussion(database: Session, user: schemas.User, text: str):
+    qa = Question(
+        created=datetime.now(tz=timezone.utc), text=text, votes=0, user=user.id
+    )
+
+    try:
+        database.add(qa)
+    except SQLAlchemyError as err:
+        database.rollback()
+        raise err
+    else:
+        database.commit()
+
+    database.refresh(qa)
+
+    return {
+        "id": qa.id,
+        "text": qa.text,
+        "user": f"{user.first_name} {user.last_name}",
+    }

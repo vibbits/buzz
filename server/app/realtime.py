@@ -8,7 +8,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from sqlalchemy.orm import Session
 
-from app import deps, polls
+from app import deps, polls, qa
 from app.authorization import user_from_token, AuthorizationError
 from app.schemas import User
 
@@ -72,6 +72,7 @@ dispatch = {
     "new_poll": ("admin", polls.create_new_poll),
     "delete_poll": ("admin", polls.delete_poll),
     "poll_vote": ("user", polls.vote),
+    "new_qa": ("user", qa.create_new_discussion),
 }
 
 
@@ -81,10 +82,11 @@ async def realtime_comms(
     database: Session = Depends(deps.get_db),
 ):
     await websocket.accept()
-    await asyncio.sleep(1)
     client = None
 
     try:
+        # Wait for a "ready" message
+        await websocket.receive_json()
         # First, request the bearer token.
         await websocket.send_json({"msg": "auth"})
         token = await websocket.receive_json()
@@ -106,7 +108,7 @@ async def realtime_comms(
                         message["msg"],
                         fn(
                             database,
-                            user.id,
+                            user,
                             **{
                                 key: value
                                 for (key, value) in message.items()
@@ -127,27 +129,3 @@ async def realtime_comms(
     except AuthorizationError as err:
         await websocket.send_json(error_msg(str(err)))
         await websocket.close()
-
-
-@router.websocket("/debug")
-async def realtime_debug(
-    websocket: WebSocket,
-    database: Session = Depends(deps.get_db),
-):
-    print("DEBUGGING", flush=True)
-    await websocket.accept()
-    client = Client(websocket, name=f"debug")
-    await broadcast(connected(client))
-    connected_clients[str(client.id)] = client
-
-    try:
-        while True:
-            message = await websocket.receive_json()
-            await broadcast(conn_info())
-    except WebSocketDisconnect:
-        del connected_clients[str(client.id)]
-        await broadcast(disconnected(client))
-    except (JSONDecodeError, KeyError):
-        del connected_clients[str(client.id)]
-        await websocket.close()
-        await broadcast(disconnected(client))

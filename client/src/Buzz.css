@@ -22,6 +22,13 @@ section.app-container {
   width: 100%;
 }
 
+.interaction-box {
+  border: 1px solid #ccc;
+  box-shadow: 0 1px 4px rgb(0 21 41 / 12%);
+  background: white;
+  position: relative;
+}
+
 .buttons-container {
   display: flex;
   flex-direction: row;

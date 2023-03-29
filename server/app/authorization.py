@@ -14,7 +14,6 @@ class AuthorizationError(Exception):
 
 
 def user_from_token(token: str) -> User:
-    print(token)
     try:
         payload = jwt.decode(token, settings.api_secret, "HS256")
     except JOSEError as err:

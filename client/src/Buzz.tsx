@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 import * as R from "ramda";
 
-import { getSocket, Poll, useMeQuery, usePollsQuery } from "./api";
+import { getSocket, Discussion, Poll, useMeQuery, useStateQuery } from "./api";
 import { useAppSelector } from "./store";
 import { Welcome } from "./Welcome";
 import { Poll as ViewPoll } from "./Poll";
@@ -28,6 +28,11 @@ const createPoll = (title: string, description: string, options: string[]) => {
 const deletePoll = (poll_id: number) => {
   const socket = getSocket();
   socket.send(JSON.stringify({ msg: "delete_poll", poll_id }));
+};
+
+const createQA = (text: string) => {
+  const socket = getSocket();
+  socket.send(JSON.stringify({ msg: "new_qa", text }));
 };
 
 type CreatePollOptionProps = {
@@ -69,9 +74,7 @@ const CreatePollOption: React.FC<CreatePollOptionProps> = (props) => {
         >
           Remove option
         </button>
-      ) : (
-        <></>
-      )}
+      ) : null}
     </div>
   );
 };
@@ -181,17 +184,17 @@ const DeletePollButton: React.FC<{ pollID: number }> = ({ pollID }) => {
     );
   }
 
-  return <></>;
+  return null;
 };
 
 const PollApp: React.FC<{ cn: string }> = ({ cn }) => {
-  const { data } = usePollsQuery();
+  const { data } = useStateQuery();
   const me = useMeQuery();
 
   return (
     <section className={`app-container ${cn}`}>
       <h2 className="hide-on-mobile">Polls</h2>
-      {me?.data?.role === "admin" ? <CreatePollButton /> : <></>}
+      {me?.data?.role === "admin" ? <CreatePollButton /> : null}
       <div
         style={{
           display: "flex",
@@ -200,7 +203,7 @@ const PollApp: React.FC<{ cn: string }> = ({ cn }) => {
           margin: "15px 0",
         }}
       >
-        {data?.map((poll: Poll) => (
+        {data?.polls.map((poll: Poll) => (
           <ViewPoll
             key={poll.id}
             title={poll.title}
@@ -217,10 +220,57 @@ const PollApp: React.FC<{ cn: string }> = ({ cn }) => {
   );
 };
 
+const CreateDiscussionButton: React.FC<{}> = () => {
+  const [pressed, setPressed] = useState(false);
+  const [text, setText] = useState("");
+
+  if (pressed) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <textarea
+          rows={15}
+          cols={40}
+          onChange={(e) => setText(e.target.value)}
+        ></textarea>
+        <button onClick={() => setPressed(false)}>Cancel</button>
+        <button
+          onClick={() => {
+            setPressed(false);
+            createQA(text);
+          }}
+        >
+          Create post
+        </button>
+      </div>
+    );
+  }
+
+  return <button onClick={() => setPressed(true)}>Create Poll</button>;
+};
+
+const ViewDiscussion: React.FC<{ text: string }> = ({ text }) => {
+  return <div className="interaction-box">{text}</div>;
+};
+
 const QAApp: React.FC<{ cn: string }> = ({ cn }) => {
+  const { data } = useStateQuery();
+
   return (
     <section className={`app-container ${cn}`}>
       <h2 className="hide-on-mobile">Q&A</h2>
+      <CreateDiscussionButton />
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "15px",
+          margin: "15px 0",
+        }}
+      >
+        {data?.qas.map((qa: Discussion) => (
+          <ViewDiscussion key={qa.id} text={qa.text} />
+        ))}
+      </div>
     </section>
   );
 };

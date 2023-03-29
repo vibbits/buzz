@@ -30,11 +30,7 @@ export const LoginRedirect: React.FC<{}> = () => {
     dispatch(auth.actions.setAuth(data));
   }, [dispatch, data]);
 
-  if (authToken) {
-    return <Navigate to="/" />;
-  } else {
-    return <></>;
-  }
+  return authToken ? <Navigate to="/" /> : null;
 };
 
 const UserAuthenticatedButtons: React.FC<{}> = () => {
@@ -52,9 +48,7 @@ const UserAuthenticatedButtons: React.FC<{}> = () => {
       <div className="vib-auth">
         {data.role === "admin" ? (
           <a className="vib-auth-button vib-admin">Access Admin</a>
-        ) : (
-          <></>
-        )}
+        ) : null}
         <a className="vib-auth-button vib-user-info">
           {data.first_name} {data.last_name}
         </a>

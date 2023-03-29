@@ -30,6 +30,32 @@ export type Poll = {
   votes: { [id: string]: number };
 };
 
+export type Comment = {
+  id: number;
+  text: string;
+  user: string;
+};
+
+export type Discussion = {
+  id: number;
+  text: string;
+  votes: number;
+  user: string;
+  comments: Comment[];
+};
+
+type State = {
+  polls: Poll[];
+  qas: Discussion[];
+};
+
+type NewDiscussionMessage = {
+  msg: "new_qa";
+  id: number;
+  text: string;
+  user: string;
+};
+
 type NewPollMessage = {
   msg: "new_poll";
   id: number;
@@ -63,7 +89,8 @@ type Message =
   | AuthMessage
   | NewPollMessage
   | DeletePollMessage
-  | PollVoteMessage;
+  | PollVoteMessage
+  | NewDiscussionMessage;
 
 let socket: WebSocket | null = null;
 export const getSocket = (): WebSocket => {
@@ -111,8 +138,8 @@ export const api = createApi({
     me: builder.query<User, void>({
       query: () => "/auth/me",
     }),
-    polls: builder.query<Poll[], void>({
-      query: () => "/poll/",
+    state: builder.query<State, void>({
+      query: () => "/state/",
       async onCacheEntryAdded(
         _arg,
         { cacheDataLoaded, cacheEntryRemoved, updateCachedData }
@@ -125,53 +152,94 @@ export const api = createApi({
           socket.addEventListener("message", (event: MessageEvent) => {
             const message: Message = JSON.parse(event.data);
             switch (message.msg) {
-              case "auth": {
-                socket.send(
-                  JSON.stringify(
-                    authMessage(
-                      JSON.parse(window.localStorage.getItem("token") || "null")
+              case "auth":
+                {
+                  socket.send(
+                    JSON.stringify(
+                      authMessage(
+                        JSON.parse(
+                          window.localStorage.getItem("token") || "null"
+                        )
+                      )
                     )
-                  )
-                );
-                break;
-              }
-              case "new_poll": {
-                updateCachedData(
-                  R.prepend({
-                    id: message.id,
-                    title: message.title,
-                    description: message.description,
-                    options: message.options,
-                    votes: {},
-                  })
-                );
-                break;
-              }
-              case "delete_poll": {
-                if (message.poll_id !== undefined) {
-                  updateCachedData(
-                    R.filter((poll: Poll) => poll.id !== message.poll_id)
                   );
                 }
                 break;
-              }
-              case "poll_vote": {
-                updateCachedData((draft) => {
-                  const i = draft.map((poll) => poll.id).indexOf(message.poll);
-                  const poll = draft[i];
-                  if (poll !== undefined) {
-                    if (poll.votes[message.option] !== undefined) {
-                      poll.votes[message.option]++;
-                    } else {
-                      poll.votes[message.option] = 1;
-                    }
-                  }
-                  return draft;
-                });
+
+              case "new_poll":
+                {
+                  updateCachedData((state) => {
+                    state.polls = R.prepend(
+                      {
+                        id: message.id,
+                        title: message.title,
+                        description: message.description,
+                        options: message.options,
+                        votes: {},
+                      },
+                      state.polls
+                    );
+                    return state;
+                  });
+                }
                 break;
-              }
+
+              case "delete_poll":
+                {
+                  if (message.poll_id !== undefined) {
+                    updateCachedData((state) => {
+                      state.polls = R.filter(
+                        (poll: Poll) => poll.id !== message.poll_id,
+                        state.polls
+                      );
+                      return state;
+                    });
+                  }
+                }
+                break;
+
+              case "poll_vote":
+                {
+                  updateCachedData((draft) => {
+                    const i = draft.polls
+                      .map((poll) => poll.id)
+                      .indexOf(message.poll);
+                    const poll = draft.polls[i];
+                    if (poll !== undefined) {
+                      if (poll.votes[message.option] !== undefined) {
+                        poll.votes[message.option]++;
+                      } else {
+                        poll.votes[message.option] = 1;
+                      }
+                    }
+                    return draft;
+                  });
+                }
+                break;
+
+              case "new_qa":
+                {
+                  updateCachedData((state) => {
+                    state.qas = R.prepend(
+                      {
+                        id: message.id,
+                        text: message.text,
+                        user: message.user,
+                        votes: 0,
+                        comments: [],
+                      },
+                      state.qas
+                    );
+                    return state;
+                  });
+                }
+                break;
             }
             console.log(message);
+          });
+
+          socket.addEventListener("open", () => {
+            socket.send(JSON.stringify({ msg: "ready" }));
           });
 
           await cacheEntryRemoved;
@@ -186,4 +254,4 @@ export const api = createApi({
   }),
 });
 
-export const { useTokenQuery, useMeQuery, usePollsQuery } = api;
+export const { useTokenQuery, useMeQuery, useStateQuery } = api;

@@ -33,14 +33,14 @@ async def get_polls(
 
 
 def create_new_poll(
-    database: Session, _uid: int, title: str, description: str, options: list[str]
+    database: Session, _user: User, title: str, description: str, options: list[str]
 ):
     return crud.create_new_poll(database, title, description, options)
 
 
-def delete_poll(database: Session, _uid: int, poll_id: int):
+def delete_poll(database: Session, _user: User, poll_id: int):
     return crud.delete_poll(database, poll_id)
 
 
-def vote(database: Session, uid: int, poll: int, option: int):
-    return crud.poll_vote(database, uid, poll, option)
+def vote(database: Session, user: User, poll: int, option: int):
+    return crud.poll_vote(database, user.id, poll, option)

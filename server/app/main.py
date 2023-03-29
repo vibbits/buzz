@@ -6,7 +6,7 @@ import uvicorn
 from fastapi import APIRouter, FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 
-from app import auth, polls, realtime
+from app import auth, polls, realtime, state
 from app.config import settings
 
 app = FastAPI()
@@ -22,6 +22,7 @@ app.add_middleware(
 router = APIRouter()
 router.include_router(auth.router, prefix="/auth")
 router.include_router(polls.router, prefix="/poll")
+router.include_router(state.router, prefix="/state")
 router.include_router(realtime.router)
 
 app.include_router(router)

@@ -40,3 +40,24 @@ class Poll(BaseModel):
     description: str
     options: list[tuple[str, int]]
     votes: dict[int, int]
+
+
+class Comment(BaseModel):
+    "A Q&A comment  on a discussion thread"
+    id: int
+    text: str
+    user: str
+
+
+class Discussion(BaseModel):
+    "A Q&A discussion"
+    id: int
+    text: str
+    votes: int
+    user: str
+    comments: list[Comment]
+
+
+class State(BaseModel):
+    polls: list[Poll]
+    qas: list[Discussion]

@@ -2,6 +2,7 @@ import React from "react";
 import * as R from "ramda";
 
 import { PollOption } from "./api";
+import "./Buzz.css";
 import "./Poll.css";
 
 type PollProps = {
@@ -20,13 +21,10 @@ export const Poll: React.FC<React.PropsWithChildren<PollProps>> = (props) => {
 
   return (
     <div
+      className="interaction-box"
       style={{
-        border: "1px solid #ccc",
         paddingRight: "15px",
         paddingBottom: "15px",
-        boxShadow: "0 1px 4px rgb(0 21 41 / 12%)",
-        background: "white",
-        position: "relative",
       }}
     >
       {props.children}
