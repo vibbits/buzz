@@ -156,7 +156,7 @@ def qa_vote(database: Session, qa: int):
         discussion := database.query(Question).filter(Question.id == qa).one_or_none()
     ) is not None:
         discussion.votes = discussion.votes + 1
-        database.flush()
+        database.commit()
 
         return {"qa": qa}
     return {}
