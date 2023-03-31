@@ -75,6 +75,7 @@ dispatch = {
     "new_qa": ("user", qa.create_new_discussion),
     "qa_vote": ("user", qa.vote),
     "qa_comment": ("user", qa.comment),
+    "qa_delete": ("admin", qa.delete),
 }
 
 

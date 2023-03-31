@@ -183,3 +183,12 @@ def qa_comment(database: Session, user: schemas.User, text: str, qa: int):
         "text": comment.text,
         "user": f"{user.first_name} {user.last_name}",
     }
+
+
+def qa_delete(database: Session, qa: int):
+    the_qa = database.query(Question).filter(Question.id == qa).one_or_none()
+    if the_qa is not None:
+        database.delete(the_qa)
+        database.commit()
+
+    return {"qa": qa}

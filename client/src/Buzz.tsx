@@ -46,6 +46,11 @@ const QAComment = (qa_id: number) => (text: string) => {
   socket.send(JSON.stringify({ msg: "qa_comment", text, qa: qa_id }));
 };
 
+const deleteQA = (qa_id: number) => {
+  const socket = getSocket();
+  socket.send(JSON.stringify({ msg: "qa_delete", qa: qa_id }));
+};
+
 type CreatePollOptionProps = {
   index: number;
   option: string | null;
@@ -180,7 +185,9 @@ const CreatePollButton: React.FC<{}> = () => {
   return <button onClick={() => setPressed(true)}>Create Poll</button>;
 };
 
-const DeletePollButton: React.FC<{ pollID: number }> = ({ pollID }) => {
+const AdminDeleteButton: React.FC<{ deleteFn: () => void }> = ({
+  deleteFn,
+}) => {
   const { data } = useMeQuery();
 
   if (data && data.role === "admin") {
@@ -188,7 +195,7 @@ const DeletePollButton: React.FC<{ pollID: number }> = ({ pollID }) => {
       <button
         className="flat-ui-button"
         style={{ position: "absolute", right: "0" }}
-        onClick={() => deletePoll(pollID)}
+        onClick={deleteFn}
       >
         ❌
       </button>
@@ -216,7 +223,7 @@ const PollApp: React.FC<{ cn: string }> = ({ cn }) => {
             votes={poll.votes}
             selectOption={selectPollOption(poll.id)}
           >
-            <DeletePollButton pollID={poll.id} />
+            <AdminDeleteButton deleteFn={() => deletePoll(poll.id)} />
           </ViewPoll>
         ))}
       </div>
@@ -243,7 +250,7 @@ const CreateDiscussionButton: React.FC<{}> = () => {
             createQA(text);
           }}
         >
-          Create Post
+          Ask a question
         </button>
       </div>
     );
@@ -269,7 +276,9 @@ const QAApp: React.FC<{ cn: string }> = ({ cn }) => {
             comments={qa.comments}
             vote={QAVote(qa.id)}
             comment={QAComment(qa.id)}
-          />
+          >
+            <AdminDeleteButton deleteFn={() => deleteQA(qa.id)} />
+          </ViewDiscussion>
         ))}
       </div>
     </section>

@@ -80,16 +80,18 @@ const CommentsView: React.FC<CommentsViewProps> = ({ comments }) => {
   );
 };
 
-export const Discussion: React.FC<DiscussionProps> = ({
+export const Discussion: React.FC<React.PropsWithChildren<DiscussionProps>> = ({
   user,
   text,
   votes,
   comments,
   vote,
   comment,
+  children,
 }) => {
   return (
     <div className="interaction-box discussion-box">
+      {children}
       <pre className="discussion-text">{text}</pre>
       <div style={{ margin: "auto 0", textAlign: "start" }}>{user}</div>
       <Votes votes={votes} vote={vote} />

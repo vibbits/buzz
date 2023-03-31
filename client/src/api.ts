@@ -56,17 +56,22 @@ type NewDiscussionMessage = {
   user: string;
 };
 
-type DiscussionVote = {
+type DiscussionVoteMessage = {
   msg: "qa_vote";
   qa?: number;
 };
 
-type DiscussionComment = {
+type DiscussionCommentMessage = {
   msg: "qa_comment";
   id: number;
   text: string;
   qa: number;
   user: string;
+};
+
+type DeleteDiscussionMessage = {
+  msg: "qa_delete";
+  qa: number;
 };
 
 type NewPollMessage = {
@@ -104,8 +109,9 @@ type Message =
   | DeletePollMessage
   | PollVoteMessage
   | NewDiscussionMessage
-  | DiscussionVote
-  | DiscussionComment;
+  | DiscussionVoteMessage
+  | DiscussionCommentMessage
+  | DeleteDiscussionMessage;
 
 let socket: WebSocket | null = null;
 export const getSocket = (): WebSocket => {
@@ -277,6 +283,18 @@ export const api = createApi({
                       text: message.text,
                       user: message.user,
                     });
+                  });
+                }
+                break;
+
+              case "qa_delete":
+                {
+                  updateCachedData((state) => {
+                    state.qas = R.filter(
+                      (qa: Discussion) => qa.id !== message.qa,
+                      state.qas
+                    );
+                    return state;
                   });
                 }
                 break;

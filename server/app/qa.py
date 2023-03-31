@@ -16,3 +16,7 @@ def vote(database: Session, _user: User, qa: int):
 
 def comment(database: Session, user: User, text: str, qa: int):
     return crud.qa_comment(database, user, text, qa)
+
+
+def delete(database: Session, _user: User, qa: int):
+    return crud.qa_delete(database, qa)
