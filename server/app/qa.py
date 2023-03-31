@@ -8,3 +8,7 @@ from app.schemas import User
 
 def create_new_discussion(database: Session, user: User, text: str):
     return crud.create_new_discussion(database, user, text)
+
+
+def vote(database: Session, _user: User, qa: int):
+    return crud.qa_vote(database, qa)

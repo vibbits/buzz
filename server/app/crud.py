@@ -149,3 +149,14 @@ def create_new_discussion(database: Session, user: schemas.User, text: str):
         "text": qa.text,
         "user": f"{user.first_name} {user.last_name}",
     }
+
+
+def qa_vote(database: Session, qa: int):
+    if (
+        discussion := database.query(Question).filter(Question.id == qa).one_or_none()
+    ) is not None:
+        discussion.votes = discussion.votes + 1
+        database.flush()
+
+        return {"qa": qa}
+    return {}

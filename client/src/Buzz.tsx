@@ -36,6 +36,11 @@ const createQA = (text: string) => {
   socket.send(JSON.stringify({ msg: "new_qa", text }));
 };
 
+const QAVote = (qa_id: number) => () => {
+  const socket = getSocket();
+  socket.send(JSON.stringify({ msg: "qa_vote", qa: qa_id }));
+};
+
 type CreatePollOptionProps = {
   index: number;
   option: string | null;
@@ -242,22 +247,6 @@ const CreateDiscussionButton: React.FC<{}> = () => {
   return <button onClick={() => setPressed(true)}>Create Post</button>;
 };
 
-// const ViewDiscussion: React.FC<{
-//   text: string;
-//   votes: number;
-//   comments: Comment[];
-// }> = ({ text }) => {
-//   return (
-//     <div className="interaction-box discussion-box">
-//       <pre style={{ textAlign: "left", padding: "1rem" }}>{text}</pre>
-//       <div className="discussion-comments">
-//         <hr />
-//         This is a comment
-//       </div>
-//     </div>
-//   );
-// };
-
 const QAApp: React.FC<{ cn: string }> = ({ cn }) => {
   const { data } = useStateQuery();
 
@@ -273,6 +262,7 @@ const QAApp: React.FC<{ cn: string }> = ({ cn }) => {
             text={qa.text}
             votes={qa.votes}
             comments={qa.comments}
+            vote={QAVote(qa.id)}
           />
         ))}
       </div>
