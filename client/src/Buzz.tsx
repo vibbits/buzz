@@ -7,6 +7,7 @@ import { useAppSelector } from "./store";
 import { Welcome } from "./Welcome";
 import { Poll as ViewPoll } from "./Poll";
 import { ButtonTab } from "./ButtonTab";
+import { Discussion as ViewDiscussion } from "./Discussion";
 import "./Buzz.css";
 
 const selectPollOption = (poll: number) => (option: number) => () => {
@@ -195,14 +196,7 @@ const PollApp: React.FC<{ cn: string }> = ({ cn }) => {
     <section className={`app-container ${cn}`}>
       <h2 className="hide-on-mobile">Polls</h2>
       {me?.data?.role === "admin" ? <CreatePollButton /> : null}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "15px",
-          margin: "15px 0",
-        }}
-      >
+      <div className="app-interaction-container">
         {data?.polls.map((poll: Poll) => (
           <ViewPoll
             key={poll.id}
@@ -239,18 +233,30 @@ const CreateDiscussionButton: React.FC<{}> = () => {
             createQA(text);
           }}
         >
-          Create post
+          Create Post
         </button>
       </div>
     );
   }
 
-  return <button onClick={() => setPressed(true)}>Create Poll</button>;
+  return <button onClick={() => setPressed(true)}>Create Post</button>;
 };
 
-const ViewDiscussion: React.FC<{ text: string }> = ({ text }) => {
-  return <div className="interaction-box">{text}</div>;
-};
+// const ViewDiscussion: React.FC<{
+//   text: string;
+//   votes: number;
+//   comments: Comment[];
+// }> = ({ text }) => {
+//   return (
+//     <div className="interaction-box discussion-box">
+//       <pre style={{ textAlign: "left", padding: "1rem" }}>{text}</pre>
+//       <div className="discussion-comments">
+//         <hr />
+//         This is a comment
+//       </div>
+//     </div>
+//   );
+// };
 
 const QAApp: React.FC<{ cn: string }> = ({ cn }) => {
   const { data } = useStateQuery();
@@ -259,16 +265,15 @@ const QAApp: React.FC<{ cn: string }> = ({ cn }) => {
     <section className={`app-container ${cn}`}>
       <h2 className="hide-on-mobile">Q&A</h2>
       <CreateDiscussionButton />
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "15px",
-          margin: "15px 0",
-        }}
-      >
+      <div className="app-interaction-container">
         {data?.qas.map((qa: Discussion) => (
-          <ViewDiscussion key={qa.id} text={qa.text} />
+          <ViewDiscussion
+            key={qa.id}
+            user={qa.user}
+            text={qa.text}
+            votes={qa.votes}
+            comments={qa.comments}
+          />
         ))}
       </div>
     </section>

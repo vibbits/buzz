@@ -22,6 +22,15 @@ section.app-container {
   width: 100%;
 }
 
+.app-interaction-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin: 15px 0;
+  max-height: 2400px;
+  overflow-y: scroll;
+}
+
 .interaction-box {
   border: 1px solid #ccc;
   box-shadow: 0 1px 4px rgb(0 21 41 / 12%);
@@ -56,6 +65,48 @@ section.app-container {
 
 .inset-shadow-right {
   box-shadow: inset -10px -10px 10px -10px #777;
+}
+
+.discussion-box {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 3rem;
+  padding: 1rem;
+}
+
+.discussion-text {
+  grid-column-start: span 3;
+  text-align: start;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+  padding: 1rem;
+}
+
+.discussion-comments {
+  display: flex;
+  flex-direction: column;
+}
+
+.votes-box {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  font-size: 2rem;
+}
+
+.votes-box > button {
+  font-size: inherit;
+}
+
+.text-align-left {
+  text-align: left;
+}
+
+hr.subtle-hr {
+  border: 0;
+  height: 1px;
+  background: #333;
+  background-image: linear-gradient(to right, #ccc, #333, #ccc);
 }
 
 @media only screen and (min-width: 990px) {
