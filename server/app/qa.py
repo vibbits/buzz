@@ -12,3 +12,7 @@ def create_new_discussion(database: Session, user: User, text: str):
 
 def vote(database: Session, _user: User, qa: int):
     return crud.qa_vote(database, qa)
+
+
+def comment(database: Session, user: User, text: str, qa: int):
+    return crud.qa_comment(database, user, text, qa)

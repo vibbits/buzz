@@ -71,7 +71,9 @@ class Question(Base):
     user = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
     asker: Mapped[User] = relationship("User")
     comments: Mapped[list["QuestionComment"]] = relationship(
-        "QuestionComment", cascade="all, delete"
+        "QuestionComment",
+        cascade="all, delete",
+        order_by="desc(QuestionComment.created)",
     )
 
 

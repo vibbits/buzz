@@ -41,6 +41,11 @@ const QAVote = (qa_id: number) => () => {
   socket.send(JSON.stringify({ msg: "qa_vote", qa: qa_id }));
 };
 
+const QAComment = (qa_id: number) => (text: string) => {
+  const socket = getSocket();
+  socket.send(JSON.stringify({ msg: "qa_comment", text, qa: qa_id }));
+};
+
 type CreatePollOptionProps = {
   index: number;
   option: string | null;
@@ -263,6 +268,7 @@ const QAApp: React.FC<{ cn: string }> = ({ cn }) => {
             votes={qa.votes}
             comments={qa.comments}
             vote={QAVote(qa.id)}
+            comment={QAComment(qa.id)}
           />
         ))}
       </div>

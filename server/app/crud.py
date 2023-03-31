@@ -8,7 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app import schemas
-from app.models import User, Poll, PollOption, PollVote, Question
+from app.models import User, Poll, PollOption, PollVote, Question, QuestionComment
 
 # Auth
 
@@ -160,3 +160,26 @@ def qa_vote(database: Session, qa: int):
 
         return {"qa": qa}
     return {}
+
+
+def qa_comment(database: Session, user: schemas.User, text: str, qa: int):
+    comment = QuestionComment(
+        created=datetime.now(tz=timezone.utc), text=text, question=qa, user=user.id
+    )
+
+    try:
+        database.add(comment)
+    except SQLAlchemyError as err:
+        database.rollback()
+        raise err
+    else:
+        database.commit()
+
+    database.refresh(comment)
+
+    return {
+        "id": comment.id,
+        "qa": comment.question,
+        "text": comment.text,
+        "user": f"{user.first_name} {user.last_name}",
+    }

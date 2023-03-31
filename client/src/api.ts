@@ -61,6 +61,14 @@ type DiscussionVote = {
   qa?: number;
 };
 
+type DiscussionComment = {
+  msg: "qa_comment";
+  id: number;
+  text: string;
+  qa: number;
+  user: string;
+};
+
 type NewPollMessage = {
   msg: "new_poll";
   id: number;
@@ -96,7 +104,8 @@ type Message =
   | DeletePollMessage
   | PollVoteMessage
   | NewDiscussionMessage
-  | DiscussionVote;
+  | DiscussionVote
+  | DiscussionComment;
 
 let socket: WebSocket | null = null;
 export const getSocket = (): WebSocket => {
@@ -254,6 +263,20 @@ export const api = createApi({
                       }
                     }
                     return state;
+                  });
+                }
+                break;
+
+              case "qa_comment":
+                {
+                  updateCachedData((state) => {
+                    const i = state.qas.map((qa) => qa.id).indexOf(message.qa);
+                    const qa = state.qas[i];
+                    qa?.comments.unshift({
+                      id: message.id,
+                      text: message.text,
+                      user: message.user,
+                    });
                   });
                 }
                 break;

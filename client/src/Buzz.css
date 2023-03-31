@@ -70,7 +70,7 @@ section.app-container {
 .discussion-box {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: 1fr 3rem;
+  grid-template-rows: 1fr 3rem 5rem auto;
   padding: 1rem;
 }
 
@@ -89,7 +89,7 @@ section.app-container {
 
 .votes-box {
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
   align-items: center;
   font-size: 2rem;
 }
@@ -102,7 +102,58 @@ section.app-container {
   text-align: left;
 }
 
+.comment-form {
+  grid-column-start: 1;
+  grid-column-end: span 3;
+  grid-row-start: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.comment-form > textarea {
+  flex-grow: 2;
+  width: 90%;
+}
+
+.comment-form > button {
+  width: fit-content;
+  background: #1b2944;
+  color: white;
+  font-weight: bold;
+}
+
+.comment-view {
+  margin-top: 1rem;
+  margin-left: 5%;
+  grid-column-start: 1;
+  grid-column-end: span 3;
+  grid-row-start: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+}
+
+.comment-container {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  margin: 0.3rem 0.5rem;
+}
+
+.comment-author {
+  font-size: 0.7rem;
+}
+
+.comment {
+  margin-left: 0.5rem;
+  border-left: 3px solid #ccc;
+  padding: 0.5rem;
+}
+
 hr.subtle-hr {
+  width: 95%;
   border: 0;
   height: 1px;
   background: #333;
