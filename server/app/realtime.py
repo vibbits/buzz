@@ -35,8 +35,8 @@ connected_clients: dict[str, Client] = {}
 
 
 async def broadcast(message: Message):
-    connected_clients = connected_clients.values()
-    for client in connected_clients:
+    clients = connected_clients.values()
+    for client in clients:
         await client.socket.send_json(message)
 
 
