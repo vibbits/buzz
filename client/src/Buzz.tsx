@@ -256,7 +256,7 @@ const CreateDiscussionButton: React.FC<{}> = () => {
     );
   }
 
-  return <button onClick={() => setPressed(true)}>Create Post</button>;
+  return <button onClick={() => setPressed(true)}>Ask a question</button>;
 };
 
 const QAApp: React.FC<{ cn: string }> = ({ cn }) => {
