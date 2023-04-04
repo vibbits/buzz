@@ -1,7 +1,7 @@
 " Realtime communication between clients "
 
-import asyncio
 from json import JSONDecodeError
+import logging
 from uuid import uuid4 as uuid
 from uuid import UUID
 
@@ -9,9 +9,8 @@ from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from sqlalchemy.orm import Session
 
 from app import deps, polls, qa
-from app.authorization import user_from_token, AuthorizationError
+from app.authorization import AuthorizationError
 from app.client import ConnectionManager
-from app.schemas import User
 
 
 # Types
@@ -19,20 +18,11 @@ from app.schemas import User
 Message = dict[str, str]
 
 
-class Client:
-    id: UUID
-    socket: WebSocket
-    name: str
-
-    def __init__(self, socket: WebSocket, name: str):
-        self.id = uuid()
-        self.socket = socket
-        self.name = name
-
-
 router = APIRouter()
 
 manager = ConnectionManager()
+
+log = logging.getLogger(__name__)
 
 
 # Messages
@@ -66,13 +56,16 @@ async def realtime_comms(
 ):
     await websocket.accept()
     client = None
+    log.info("New websocket connection on /ws")
 
     try:
         client = await manager.connect(websocket)
+        log.info(f"Connected client: {client.id}")
 
         while True:
             message = await websocket.receive_json()
             (role, fn) = dispatch[message["msg"]]
+            log.info(f"Received: {message}")
 
             if role == "admin" and client.role != "admin":
                 await websocket.send_json(error_msg("Forbidden"))
@@ -91,14 +84,17 @@ async def realtime_comms(
                         ),
                     )
                 )
-    except WebSocketDisconnect:
+    except WebSocketDisconnect as dc:
+        log.warn(f"WebSocketDisconnect: {dc}")
         if client is not None:
-            manager.disconnect(client)
+            await manager.disconnect(client)
 
-    except (JSONDecodeError, KeyError):
+    except (JSONDecodeError, KeyError) as err:
+        log.error(f"Error: {err}")
         await websocket.close()
         if client is not None:
-            manager.disconnect(client)
+            await manager.disconnect(client)
     except AuthorizationError as err:
+        log.error(f"Authorization error: {err}")
         await websocket.send_json(error_msg(str(err)))
         await websocket.close()

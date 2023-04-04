@@ -2,12 +2,16 @@
 Main entry point
 """
 
+import logging
+
 import uvicorn
 from fastapi import APIRouter, FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 
 from app import auth, polls, realtime, state
 from app.config import settings
+
+logging.basicConfig(level=logging.DEBUG)
 
 app = FastAPI()
 
