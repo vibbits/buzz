@@ -80,6 +80,7 @@ section.app-container {
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 3px;
   padding: 1rem;
+  white-space: pre-line;
 }
 
 .discussion-comments {
@@ -150,6 +151,10 @@ section.app-container {
   margin-left: 0.5rem;
   border-left: 3px solid #ccc;
   padding: 0.5rem;
+}
+
+.comment > pre {
+  white-space: pre-wrap;
 }
 
 hr.subtle-hr {
