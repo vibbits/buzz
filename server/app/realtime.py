@@ -39,6 +39,7 @@ def response(message: str, package: dict[str, str]) -> Message:
 # API
 
 dispatch = {
+    "ping": ("user", lambda: {"msg": "pong"}),
     "new_poll": ("admin", polls.create_new_poll),
     "delete_poll": ("admin", polls.delete_poll),
     "poll_vote": ("user", polls.vote),
@@ -64,16 +65,18 @@ async def realtime_comms(
 
         while True:
             message = await websocket.receive_json()
-            (role, fn) = dispatch[message["msg"]]
-            log.info(f"Received: {message}")
+            (role, handler) = dispatch[message["msg"]]
+            log.info(f"Received (from: {client.id}): {message}")
 
-            if role == "admin" and client.role != "admin":
+            if message["msg"] == "ping":
+                await websocket.send_json(handler())
+            elif role == "admin" and client.role != "admin":
                 await websocket.send_json(error_msg("Forbidden"))
             else:
                 await manager.broadcast(
                     response(
                         message["msg"],
-                        fn(
+                        handler(
                             database,
                             client.user,
                             **{

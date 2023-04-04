@@ -117,10 +117,16 @@ let socket: WebSocket | null = null;
 export const getSocket = (): WebSocket => {
   if (!socket) {
     socket = new WebSocket(`${WEBSOCKET_URL}`);
+    const serverPing = setInterval(
+      () => socket?.send(JSON.stringify({ msg: "ping" })),
+      10000
+    );
     socket.addEventListener("error", (error) => {
+      clearInterval(serverPing);
       console.log("Websocket error: ", error);
     });
     socket.addEventListener("close", (event) => {
+      clearInterval(serverPing);
       console.log("Websocket closed: ", event);
     });
   }
