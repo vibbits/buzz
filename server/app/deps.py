@@ -4,7 +4,6 @@ from typing import Generator
 from datetime import datetime, timezone
 
 from fastapi import Depends, Header, HTTPException, status
-from fastapi.security import OpenIdConnect
 from fastapi.security.utils import get_authorization_scheme_param
 from jose import jwt
 from jose.exceptions import JWTError
@@ -25,6 +24,7 @@ def get_db() -> Generator[SessionType, None, None]:
 
 
 def current_user(authorization: str = Header()) -> User:
+    "Check the bearer token and retrieve associated user information."
     scheme, token = get_authorization_scheme_param(authorization)
     if scheme.lower() != "bearer":
         raise HTTPException(
@@ -51,6 +51,10 @@ def current_user(authorization: str = Header()) -> User:
 
 
 def current_admin(user: User = Depends(current_user)) -> User:
+    """
+    Check the bearer token is for an administrator,
+    and return associated administrator information.
+    """
     if not user.role == "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Not an admin"

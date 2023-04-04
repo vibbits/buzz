@@ -1,13 +1,11 @@
 " User authentication with VIB Services "
 
-from calendar import timegm
 from datetime import datetime, timedelta, timezone
-import json
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import RedirectResponse
-from jose import jws, jwt
+from jose import jwt
 from jose.exceptions import ExpiredSignatureError, JWTClaimsError, JWTError
 
 from app import crud, deps
@@ -21,6 +19,7 @@ router = APIRouter()
 
 @router.get("/login")
 async def login_redirect(redirect: str):
+    "Redirect user to VIB services for login."
     params = {
         "client_id": "training_vote",
         "redirect_uri": redirect,
@@ -34,6 +33,7 @@ async def login_redirect(redirect: str):
 
 
 def create_access_token(user: dict[str, str]) -> str:
+    "Create an access token for THIS API."
     expire = datetime.now(timezone.utc) + timedelta(minutes=settings.api_token_expire)
     to_encode = user | {"exp": expire.timestamp()}
     return jwt.encode(to_encode, settings.api_secret, "HS256")
@@ -43,6 +43,7 @@ def create_access_token(user: dict[str, str]) -> str:
 async def get_bearer_token(
     body: AuthorizationCode, database: Session = Depends(deps.get_db)
 ) -> Token:
+    "Authenticate a newly logged in user and generate a bearer token."
     (tkn, keys) = await token(body.code, body.redirect)
     if "error" in tkn:
         raise HTTPException(
@@ -89,5 +90,6 @@ async def get_bearer_token(
 
 
 @router.get("/me")
-async def me(user: User = Depends(deps.current_user)):
+async def get_me(user: User = Depends(deps.current_user)):
+    "Return decoded user information for a logged in user."
     return user

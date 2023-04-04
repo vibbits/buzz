@@ -14,6 +14,7 @@ from app.models import User, Poll, PollOption, PollVote, Question, QuestionComme
 
 
 def get_user_by_subject(database: Session, subject: int) -> Optional[User]:
+    "Retrieve a user from the database given their OpenID Connect unique identifier (subject)."
     return database.query(User).filter(User.id == subject).one_or_none()
 
 
@@ -24,6 +25,7 @@ def create_user(
     last_name: str,
     image: Optional[str],
 ) -> User:
+    "Create a user in the database."
     user = User(
         id=subject,
         created=datetime.now(timezone.utc),
@@ -38,14 +40,15 @@ def create_user(
     except SQLAlchemyError as err:
         database.rollback()
         raise err
-    else:
-        database.commit()
+
+    database.commit()
 
     database.refresh(user)
     return user
 
 
 def promote(database: Session, uid: int):
+    "Promote a user: change role from user to admin."
     if (user := database.query(User).filter(User.id == uid).one_or_none()) is not None:
         user.role = "admin"
         database.commit()
@@ -57,12 +60,14 @@ def promote(database: Session, uid: int):
 
 
 def all_polls(database: Session):
+    "Retrieve all polls from the database."
     return database.query(Poll).order_by(desc(Poll.created)).all()
 
 
 def create_new_poll(
     database: Session, title: str, description: str, options: list[str]
 ):
+    "Create a new poll in the database."
     poll = Poll(
         created=datetime.now(tz=timezone.utc), title=title, description=description
     )
@@ -72,8 +77,8 @@ def create_new_poll(
     except SQLAlchemyError as err:
         database.rollback()
         raise err
-    else:
-        database.commit()
+
+    database.commit()
 
     database.refresh(poll)
     poll_options = [PollOption(poll=poll.id, text=text) for text in options]
@@ -82,8 +87,8 @@ def create_new_poll(
     except SQLAlchemyError as err:
         database.rollback()
         raise err
-    else:
-        database.commit()
+
+    database.commit()
 
     final_options = database.query(PollOption).filter(PollOption.poll == poll.id).all()
     return {
@@ -95,6 +100,7 @@ def create_new_poll(
 
 
 def delete_poll(database: Session, poll: int):
+    "Remove a poll from the database."
     the_poll = database.query(Poll).filter(Poll.id == poll).one_or_none()
     if the_poll is not None:
         database.delete(the_poll)
@@ -105,6 +111,7 @@ def delete_poll(database: Session, poll: int):
 
 
 def poll_vote(database: Session, uid: int, poll: int, option: int):
+    "Add a vote to a poll in the database."
     vote = PollVote(option=option, poll=poll, user=uid)
 
     try:
@@ -112,8 +119,8 @@ def poll_vote(database: Session, uid: int, poll: int, option: int):
     except SQLAlchemyError as err:
         database.rollback()
         raise err
-    else:
-        database.commit()
+
+    database.commit()
 
     return {"poll": poll, "option": option}
 
@@ -122,6 +129,7 @@ def poll_vote(database: Session, uid: int, poll: int, option: int):
 
 
 def all_discussions(database: Session):
+    "Retrieve all Q&As form the database."
     return (
         database.query(Question)
         .order_by(desc(Question.created), desc(Question.votes))
@@ -130,41 +138,49 @@ def all_discussions(database: Session):
 
 
 def create_new_discussion(database: Session, user: schemas.User, text: str):
-    qa = Question(
+    "Create a new Q&A in the database."
+    discussion = Question(
         created=datetime.now(tz=timezone.utc), text=text, votes=0, user=user.id
     )
 
     try:
-        database.add(qa)
+        database.add(discussion)
     except SQLAlchemyError as err:
         database.rollback()
         raise err
-    else:
-        database.commit()
 
-    database.refresh(qa)
+    database.commit()
+
+    database.refresh(discussion)
 
     return {
-        "id": qa.id,
-        "text": qa.text,
+        "id": discussion.id,
+        "text": discussion.text,
         "user": f"{user.first_name} {user.last_name}",
     }
 
 
-def qa_vote(database: Session, qa: int):
+def qa_vote(database: Session, question: int):
+    "Increment the vote count on a Q&A in the database."
     if (
-        discussion := database.query(Question).filter(Question.id == qa).one_or_none()
+        discussion := database.query(Question)
+        .filter(Question.id == question)
+        .one_or_none()
     ) is not None:
         discussion.votes = discussion.votes + 1
         database.commit()
 
-        return {"qa": qa}
+        return {"qa": question}
     return {}
 
 
-def qa_comment(database: Session, user: schemas.User, text: str, qa: int):
+def qa_comment(database: Session, user: schemas.User, text: str, question: int):
+    "Add a comment to a Q&A in the database."
     comment = QuestionComment(
-        created=datetime.now(tz=timezone.utc), text=text, question=qa, user=user.id
+        created=datetime.now(tz=timezone.utc),
+        text=text,
+        question=question,
+        user=user.id,
     )
 
     try:
@@ -172,9 +188,8 @@ def qa_comment(database: Session, user: schemas.User, text: str, qa: int):
     except SQLAlchemyError as err:
         database.rollback()
         raise err
-    else:
-        database.commit()
 
+    database.commit()
     database.refresh(comment)
 
     return {
@@ -185,10 +200,11 @@ def qa_comment(database: Session, user: schemas.User, text: str, qa: int):
     }
 
 
-def qa_delete(database: Session, qa: int):
-    the_qa = database.query(Question).filter(Question.id == qa).one_or_none()
+def qa_delete(database: Session, question: int):
+    "Remove a Q&A from the database."
+    the_qa = database.query(Question).filter(Question.id == question).one_or_none()
     if the_qa is not None:
         database.delete(the_qa)
         database.commit()
 
-    return {"qa": qa}
+    return {"qa": question}

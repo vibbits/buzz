@@ -21,7 +21,7 @@ class Client:
     user: User
 
     def __init__(self, socket: WebSocket, user: User):
-        self.id = uuid()
+        self.uid = uuid()
         self.socket = socket
         self.user = user
 
@@ -47,7 +47,17 @@ def connected(client: Client) -> Message:
 
 def disconnected(client: Client) -> Message:
     "Construct a message to connected clients that a client has disconnected."
-    return {"msg": "disconnected", "id": str(client.id)}
+    return {"msg": "disconnected", "id": str(client.uid)}
+
+
+def error(message: str) -> Message:
+    "Construct a message to a connected client the there was an error."
+    return {"msg": "error", "error": message}
+
+
+def response(message: str, package: dict[str, str]) -> Message:
+    "Construct a message to connected clients responding to an event."
+    return {"msg": message} | package
 
 
 class ConnectionManager:
@@ -77,19 +87,20 @@ class ConnectionManager:
         await self.broadcast(connected(client))
 
         self.clients.append(client)
-        log.info("Client %s added: %s (%s)", client.id, client.name, client.role)
+        log.info("Client %s added: %s (%s)", client.uid, client.name, client.role)
 
         return client
 
     async def broadcast(self, message: Message):
         """
         Send a message to _all_ connected clients.
-        This can throw a `WebSocketDisconnect exception when a client has closed the connection already.
+        This can throw a `WebSocketDisconnect exception when a client
+        has closed the connection already.
         """
         log.info("broadcast()ing: %s", message)
 
         for client in self.clients:
-            log.debug("Sending to %s", client.id)
+            log.debug("Sending to %s", client.uid)
             await client.socket.send_json(message)
 
         log.info("Broadcast sent")
@@ -99,8 +110,8 @@ class ConnectionManager:
         Remove a client from the list of connected clients.
         NOTE: This function does _not_ close the websocket connection.
         """
-        log.info("disconnect(%s) %s", client.id, client.name)
+        log.info("disconnect(%s) %s", client.uid, client.name)
         self.clients.remove(client)
-        log.info("Client %s removed", client.id)
+        log.info("Client %s removed", client.uid)
 
         await self.broadcast(disconnected(client))

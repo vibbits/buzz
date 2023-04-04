@@ -5,10 +5,10 @@ Main entry point
 import logging
 
 import uvicorn
-from fastapi import APIRouter, FastAPI, WebSocket
+from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app import auth, polls, realtime, state
+from app import auth, realtime, state
 from app.config import settings
 
 logging.basicConfig(level=logging.DEBUG)
@@ -25,7 +25,6 @@ app.add_middleware(
 
 router = APIRouter()
 router.include_router(auth.router, prefix="/auth")
-router.include_router(polls.router, prefix="/poll")
 router.include_router(state.router, prefix="/state")
 router.include_router(realtime.router)
 

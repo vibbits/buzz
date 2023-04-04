@@ -2,20 +2,16 @@
 
 from json import JSONDecodeError
 import logging
-from uuid import uuid4 as uuid
-from uuid import UUID
 
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from sqlalchemy.orm import Session
 
 from app import deps, polls, qa
 from app.authorization import AuthorizationError
-from app.client import ConnectionManager
+from app.client import ConnectionManager, error, response
 
 
 # Types
-
-Message = dict[str, str]
 
 
 router = APIRouter()
@@ -23,17 +19,6 @@ router = APIRouter()
 manager = ConnectionManager()
 
 log = logging.getLogger(__name__)
-
-
-# Messages
-
-
-def error_msg(message: str) -> Message:
-    return {"msg": "error", "error": message}
-
-
-def response(message: str, package: dict[str, str]) -> Message:
-    return {"msg": message} | package
 
 
 # API
@@ -55,23 +40,24 @@ async def realtime_comms(
     websocket: WebSocket,
     database: Session = Depends(deps.get_db),
 ):
+    "Handle all realtime communication through the websocket."
     await websocket.accept()
     client = None
     log.info("New websocket connection on /ws")
 
     try:
         client = await manager.connect(websocket)
-        log.info(f"Connected client: {client.id}")
+        log.info("Connected client: %s", client.uid)
 
         while True:
             message = await websocket.receive_json()
             (role, handler) = dispatch[message["msg"]]
-            log.info(f"Received (from: {client.id}): {message}")
+            log.info("Received (from: %s): %s", client.uid, message)
 
             if message["msg"] == "ping":
                 await websocket.send_json(handler())
             elif role == "admin" and client.role != "admin":
-                await websocket.send_json(error_msg("Forbidden"))
+                await websocket.send_json(error("Forbidden"))
             else:
                 await manager.broadcast(
                     response(
@@ -87,20 +73,20 @@ async def realtime_comms(
                         ),
                     )
                 )
-    except WebSocketDisconnect as dc:
-        log.warn(f"WebSocketDisconnect: {dc}")
+    except WebSocketDisconnect as reason:
+        log.warning("WebSocketDisconnect: %s", str(reason))
         if client is not None:
-            log.info(f"Disconnecting client {client.id}")
+            log.info("Disconnecting client %s", client.uid)
             await manager.disconnect(client)
 
     except (JSONDecodeError, KeyError) as err:
-        log.error(f"Error: {err}")
-        await websocket.send_json(error_msg(str(err)))
+        log.error("Error: %s", err)
+        await websocket.send_json(error(str(err)))
         await websocket.close()
         if client is not None:
             await manager.disconnect(client)
 
     except AuthorizationError as err:
-        log.error(f"Authorization error: {err}")
-        await websocket.send_json(error_msg(str(err)))
+        log.error("Authorization error: %s", err)
+        await websocket.send_json(error(str(err)))
         await websocket.close()
