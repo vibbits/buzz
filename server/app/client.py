@@ -1,5 +1,6 @@
 " Handling of connected realtime clients "
 
+import logging
 from threading import Lock
 from typing import Literal
 from uuid import UUID, uuid4 as uuid
@@ -10,6 +11,8 @@ from app.authorization import user_from_token
 from app.schemas import User
 
 Message = dict[str, str]
+
+log = logging.getLogger(__name__)
 
 
 class Client:
@@ -49,7 +52,8 @@ class ConnectionManager:
 
     async def connect(self, socket: WebSocket) -> Client:
         # Wait for a "ready" message
-        await socket.receive_json()
+        ready = await socket.receive_json()
+        log.info(f"Ready: {ready}")
         # Request the bearer token.
         await socket.send_json({"msg": "auth"})
         token = await socket.receive_json()
@@ -57,18 +61,27 @@ class ConnectionManager:
 
         client = Client(socket, user)
         await self.broadcast(connected(client))
+        log.info(f"connect({client.id}) waiting on lock? {self.lock.locked()}")
         with self.lock:
             self.clients.append(client)
+
+        log.info(f"Client {client.id} added")
 
         return client
 
     async def broadcast(self, message: Message):
+        log.info(f"broadcast() waiting on lock? {self.lock.locked()}")
         with self.lock:
             for client in self.clients:
                 await client.socket.send_json(message)
 
+        log.info("Broadcast sent")
+
     async def disconnect(self, client: Client):
+        log.info(f"disconnect({client.id}) waiting on lock? {self.lock.locked()}")
         with self.lock:
             self.clients.remove(client)
+
+        log.info(f"Client {client.id} removed")
 
         await self.broadcast(disconnected(client))

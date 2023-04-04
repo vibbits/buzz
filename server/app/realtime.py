@@ -90,13 +90,16 @@ async def realtime_comms(
     except WebSocketDisconnect as dc:
         log.warn(f"WebSocketDisconnect: {dc}")
         if client is not None:
+            log.info(f"Disconnecting client {client.id}")
             await manager.disconnect(client)
 
     except (JSONDecodeError, KeyError) as err:
         log.error(f"Error: {err}")
+        await websocket.send_json(error_msg(str(err)))
         await websocket.close()
         if client is not None:
             await manager.disconnect(client)
+
     except AuthorizationError as err:
         log.error(f"Authorization error: {err}")
         await websocket.send_json(error_msg(str(err)))
