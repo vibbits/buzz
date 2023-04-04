@@ -117,6 +117,12 @@ let socket: WebSocket | null = null;
 export const getSocket = (): WebSocket => {
   if (!socket) {
     socket = new WebSocket(`${WEBSOCKET_URL}`);
+    socket.addEventListener("error", (error) => {
+      console.log("Websocket error: ", error);
+    });
+    socket.addEventListener("close", (event) => {
+      console.log("Websocket closed: ", event);
+    });
   }
   return socket;
 };
@@ -308,6 +314,7 @@ export const api = createApi({
 
           await cacheEntryRemoved;
 
+          console.log("Cache entry being removed. Closing the websocket");
           socket.close();
         } catch {
           // if cacheEntryRemoved resolved before cacheDataLoaded,
