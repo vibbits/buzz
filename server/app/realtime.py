@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from app import deps, polls, qa
 from app.authorization import user_from_token, AuthorizationError
+from app.client import ConnectionManager
 from app.schemas import User
 
 
@@ -31,28 +32,10 @@ class Client:
 
 router = APIRouter()
 
-connected_clients: dict[str, Client] = {}
-
-
-async def broadcast(message: Message):
-    clients = connected_clients.values()
-    for client in clients:
-        await client.socket.send_json(message)
+manager = ConnectionManager()
 
 
 # Messages
-
-
-def connected(client: Client) -> Message:
-    return {
-        "msg": "connected",
-        "id": str(client.id),
-        "name": client.name,
-    }
-
-
-def disconnected(client: Client) -> Message:
-    return {"msg": "disconnected", "id": str(client.id)}
 
 
 def error_msg(message: str) -> Message:
@@ -61,10 +44,6 @@ def error_msg(message: str) -> Message:
 
 def response(message: str, package: dict[str, str]) -> Message:
     return {"msg": message} | package
-
-
-def conn_info() -> Message:
-    return {"clients": str(len(connected_clients))}
 
 
 # API
@@ -89,30 +68,21 @@ async def realtime_comms(
     client = None
 
     try:
-        # Wait for a "ready" message
-        await websocket.receive_json()
-        # First, request the bearer token.
-        await websocket.send_json({"msg": "auth"})
-        token = await websocket.receive_json()
-        user = user_from_token(token["bearer"])
-
-        client = Client(websocket, name=f"{user.first_name} {user.last_name}")
-        await broadcast(connected(client))
-        connected_clients[str(client.id)] = client
+        client = await manager.connect(websocket)
 
         while True:
             message = await websocket.receive_json()
             (role, fn) = dispatch[message["msg"]]
 
-            if role == "admin" and user.role != "admin":
+            if role == "admin" and client.role != "admin":
                 await websocket.send_json(error_msg("Forbidden"))
             else:
-                await broadcast(
+                await manager.broadcast(
                     response(
                         message["msg"],
                         fn(
                             database,
-                            user,
+                            client.user,
                             **{
                                 key: value
                                 for (key, value) in message.items()
@@ -123,13 +93,12 @@ async def realtime_comms(
                 )
     except WebSocketDisconnect:
         if client is not None:
-            del connected_clients[str(client.id)]
-            await broadcast(disconnected(client))
+            manager.disconnect(client)
+
     except (JSONDecodeError, KeyError):
         await websocket.close()
         if client is not None:
-            del connected_clients[str(client.id)]
-            await broadcast(disconnected(client))
+            manager.disconnect(client)
     except AuthorizationError as err:
         await websocket.send_json(error_msg(str(err)))
         await websocket.close()
