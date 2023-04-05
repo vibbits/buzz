@@ -9,31 +9,31 @@ on:
   workflow_dispatch:
 
 jobs:
-  defaults:
-    run:
-      working-directory: 'server'
   quality-checks:
     runs-on: 'ubuntu-latest'
+    defaults:
+      run:
+        working-directory: 'server'
 
-  steps:
-    - uses: actions/checkout@v3
+    steps:
+      - uses: actions/checkout@v3
 
-    - uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
 
-    - uses: Gr1N/setup-poetry@v8
+      - uses: Gr1N/setup-poetry@v8
 
-    - name: 'Install dependencies'
-      run: 'poetry install'
+      - name: 'Install dependencies'
+        run: 'poetry install'
 
-    - name: 'Code formatting'
-      run: 'poetry run black --check .'
+      - name: 'Code formatting'
+        run: 'poetry run black --check .'
 
-    - name: 'PyLint'
-      run: 'poetry run pylint app/'
+      - name: 'PyLint'
+        run: 'poetry run pylint app/'
 
-    - name: 'Type checking'
-      run: 'poetry run mypy app/'
+      - name: 'Type checking'
+        run: 'poetry run mypy app/'
 
 ...
