@@ -1,7 +1,7 @@
 " Handling of connected realtime clients "
 
 import logging
-from typing import Literal
+from typing import Any, Literal
 from uuid import UUID, uuid4 as uuid
 
 from fastapi import WebSocket
@@ -9,7 +9,9 @@ from fastapi import WebSocket
 from app.authorization import user_from_token
 from app.schemas import User
 
-Message = dict[str, str]
+# A Message is a Package with a "msg" field
+Message = dict[str, str | int | list[Any]]
+Package = dict[str, str | int | list[Any]]
 
 log = logging.getLogger(__name__)
 
@@ -55,8 +57,11 @@ def error(message: str) -> Message:
     return {"msg": "error", "error": message}
 
 
-def response(message: str, package: dict[str, str]) -> Message:
-    "Construct a message to connected clients responding to an event."
+def response(message: str, package: Package) -> Message:
+    """
+    Construct a message to connected clients responding to an event.
+    If the Package already contains a "msg" field, it will NOT be overwritten.
+    """
     return {"msg": message} | package
 
 
@@ -91,7 +96,7 @@ class ConnectionManager:
 
         return client
 
-    async def broadcast(self, message: Message):
+    async def broadcast(self, message: Message) -> None:
         """
         Send a message to _all_ connected clients.
         This can throw a `WebSocketDisconnect exception when a client
@@ -105,7 +110,7 @@ class ConnectionManager:
 
         log.info("Broadcast sent")
 
-    async def disconnect(self, client: Client):
+    async def disconnect(self, client: Client) -> None:
         """
         Remove a client from the list of connected clients.
         NOTE: This function does _not_ close the websocket connection.

@@ -3,21 +3,59 @@
 from sqlalchemy.orm import Session
 
 from app import crud
+from app.client import error, Package
 from app.schemas import User
+
+Arguments = dict[str, str | int | list[str]]
 
 
 def create_new_poll(
-    database: Session, _user: User, title: str, description: str, options: list[str]
-):
+    database: Session,
+    _user: User,
+    args: Arguments,
+) -> Package:
     "Create a new poll in the database and format a reponse."
-    return crud.create_new_poll(database, title, description, options)
+    title = args.get("title")
+    description = args.get("description")
+    options = args.get("options")
+
+    try:
+        if (
+            isinstance(title, str)
+            and isinstance(description, str)
+            and isinstance(options, list)
+            and all(isinstance(option, str) for option in options)
+        ):
+            poll = crud.create_new_poll(database, title, description, options)
+            return {
+                "id": poll.id,
+                "title": poll.title,
+                "description": poll.description,
+                "options": [(opt.text, opt.id) for opt in poll.options],
+            }
+
+        return error("type mismatch")
+    except Exception as err:  # pylint: disable=broad-exception-caught
+        return error(str(err))
 
 
-def delete_poll(database: Session, _user: User, poll_id: int):
+def delete_poll(database: Session, _user: User, args: Arguments) -> Package:
     "Remove a poll from the database and format a response."
-    return crud.delete_poll(database, poll_id)
+    poll_id = args.get("poll_id")
+
+    if isinstance(poll_id, int):
+        crud.delete_poll(database, poll_id)
+        return {"poll_id": poll_id}
+
+    return error("type mismatch")
 
 
-def vote(database: Session, user: User, poll: int, option: int):
+def vote(database: Session, user: User, args: Arguments) -> Package:
     "Add a vote to the database and format a response."
-    return crud.poll_vote(database, user.id, poll, option)
+    poll = args.get("poll")
+    option = args.get("option")
+    if isinstance(poll, int) and isinstance(option, int):
+        crud.poll_vote(database, user.id, poll, option)
+        return {"poll": poll, "option": option}
+
+    return error("type mismatch")

@@ -7,10 +7,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import RedirectResponse
 from jose import jwt
 from jose.exceptions import ExpiredSignatureError, JWTClaimsError, JWTError
+from sqlalchemy.orm import Session
 
 from app import crud, deps
 from app.config import settings
-from app.database import Session
 from app.oidc import token, user_info
 from app.schemas import AuthorizationCode, Token, User
 
@@ -18,7 +18,7 @@ router = APIRouter()
 
 
 @router.get("/login")
-async def login_redirect(redirect: str):
+async def login_redirect(redirect: str) -> RedirectResponse:
     "Redirect user to VIB services for login."
     params = {
         "client_id": "training_vote",
@@ -32,11 +32,11 @@ async def login_redirect(redirect: str):
     )
 
 
-def create_access_token(user: dict[str, str]) -> str:
+def create_access_token(user: dict[str, str | int]) -> str:
     "Create an access token for THIS API."
     expire = datetime.now(timezone.utc) + timedelta(minutes=settings.api_token_expire)
     to_encode = user | {"exp": expire.timestamp()}
-    return jwt.encode(to_encode, settings.api_secret, "HS256")
+    return jwt.encode(to_encode, settings.api_secret, "HS256")  # type: ignore[no-any-return]
 
 
 @router.post("/token")
@@ -90,6 +90,6 @@ async def get_bearer_token(
 
 
 @router.get("/me")
-async def get_me(user: User = Depends(deps.current_user)):
+async def get_me(user: User = Depends(deps.current_user)) -> User:
     "Return decoded user information for a logged in user."
     return user

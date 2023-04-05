@@ -2,13 +2,15 @@
 
 from json import JSONDecodeError
 import logging
+from typing import Callable, Literal
 
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from sqlalchemy.orm import Session
 
 from app import deps, polls, qa
 from app.authorization import AuthorizationError
-from app.client import ConnectionManager, error, response
+from app.client import ConnectionManager, Package, error, response
+from app.schemas import User
 
 
 # Types
@@ -23,8 +25,21 @@ log = logging.getLogger(__name__)
 
 # API
 
-dispatch = {
-    "ping": ("user", lambda: {"msg": "pong"}),
+Arguments = dict[str, str | int | list[str]]
+
+HandlerFn = Callable[[Session, User, Arguments], Package]
+
+
+def pong_response(_database: Session, _user: User, _args: Arguments) -> Package:
+    "Placeholder."
+    return {}
+
+
+dispatch: dict[
+    str,
+    tuple[Literal["user", "admin"], HandlerFn],
+] = {
+    "ping": ("user", pong_response),
     "new_poll": ("admin", polls.create_new_poll),
     "delete_poll": ("admin", polls.delete_poll),
     "poll_vote": ("user", polls.vote),
@@ -39,7 +54,7 @@ dispatch = {
 async def realtime_comms(
     websocket: WebSocket,
     database: Session = Depends(deps.get_db),
-):
+) -> None:
     "Handle all realtime communication through the websocket."
     await websocket.accept()
     client = None
@@ -55,7 +70,7 @@ async def realtime_comms(
             log.info("Received (from: %s): %s", client.uid, message)
 
             if message["msg"] == "ping":
-                await websocket.send_json(handler())
+                await websocket.send_json({"msg": "pong"})
             elif role == "admin" and client.role != "admin":
                 await websocket.send_json(error("Forbidden"))
             else:
@@ -65,7 +80,7 @@ async def realtime_comms(
                         handler(
                             database,
                             client.user,
-                            **{
+                            {
                                 key: value
                                 for (key, value) in message.items()
                                 if key != "msg"

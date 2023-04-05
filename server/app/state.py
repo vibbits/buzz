@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app import crud, deps
+from app import models as dbmdl
 from app.schemas import Comment, Discussion, Poll, State, User
 
 router = APIRouter()
@@ -14,14 +15,14 @@ router = APIRouter()
 @router.get("/", response_model=State)
 def get_state(
     database: Session = Depends(deps.get_db), _user: User = Depends(deps.current_user)
-):
+) -> State:
     """
     Current application state. Including:
     - Polls
     - Q&A
     """
 
-    def make_poll(poll):
+    def make_poll(poll: dbmdl.Poll) -> Poll:
         "Create a Poll according to the schema from a ORM object."
         options = [(opt.text, opt.id) for opt in poll.options]
         votes = {
@@ -36,7 +37,7 @@ def get_state(
             votes=votes,
         )
 
-    def make_qa(question):
+    def make_qa(question: dbmdl.Question) -> Discussion:
         "Create a Discussion accoring to the schema from an ORM object."
         return Discussion(
             id=question.id,

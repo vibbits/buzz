@@ -47,4 +47,4 @@ async def user_info(access_token: str) -> dict[str, str]:
             "https://services.vib.be/connect/userinfo",
             headers={"Authorization": f"Bearer {access_token}"},
         )
-        return info.json()
+        return info.json()  # type: ignore[no-any-return]

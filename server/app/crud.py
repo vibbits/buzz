@@ -47,7 +47,7 @@ def create_user(
     return user
 
 
-def promote(database: Session, uid: int):
+def promote(database: Session, uid: int) -> Optional[User]:
     "Promote a user: change role from user to admin."
     if (user := database.query(User).filter(User.id == uid).one_or_none()) is not None:
         user.role = "admin"
@@ -59,14 +59,14 @@ def promote(database: Session, uid: int):
 # Polls
 
 
-def all_polls(database: Session):
+def all_polls(database: Session) -> list[Poll]:
     "Retrieve all polls from the database."
     return database.query(Poll).order_by(desc(Poll.created)).all()
 
 
 def create_new_poll(
     database: Session, title: str, description: str, options: list[str]
-):
+) -> Poll:
     "Create a new poll in the database."
     poll = Poll(
         created=datetime.now(tz=timezone.utc), title=title, description=description
@@ -80,7 +80,6 @@ def create_new_poll(
 
     database.commit()
 
-    database.refresh(poll)
     poll_options = [PollOption(poll=poll.id, text=text) for text in options]
     try:
         database.add_all(poll_options)
@@ -89,28 +88,20 @@ def create_new_poll(
         raise err
 
     database.commit()
+    database.refresh(poll)
 
-    final_options = database.query(PollOption).filter(PollOption.poll == poll.id).all()
-    return {
-        "id": poll.id,
-        "title": title,
-        "description": description,
-        "options": [(opt.text, opt.id) for opt in final_options],
-    }
+    return poll
 
 
-def delete_poll(database: Session, poll: int):
-    "Remove a poll from the database."
+def delete_poll(database: Session, poll: int) -> None:
+    "Remove a poll from the database. Returns False on failure"
     the_poll = database.query(Poll).filter(Poll.id == poll).one_or_none()
     if the_poll is not None:
         database.delete(the_poll)
         database.commit()
-        return {"poll_id": poll}
-
-    return {}
 
 
-def poll_vote(database: Session, uid: int, poll: int, option: int):
+def poll_vote(database: Session, uid: int, poll: int, option: int) -> None:
     "Add a vote to a poll in the database."
     vote = PollVote(option=option, poll=poll, user=uid)
 
@@ -122,13 +113,11 @@ def poll_vote(database: Session, uid: int, poll: int, option: int):
 
     database.commit()
 
-    return {"poll": poll, "option": option}
-
 
 # Discussions / Q&A
 
 
-def all_discussions(database: Session):
+def all_discussions(database: Session) -> list[Question]:
     "Retrieve all Q&As form the database."
     return (
         database.query(Question)
@@ -137,7 +126,7 @@ def all_discussions(database: Session):
     )
 
 
-def create_new_discussion(database: Session, user: schemas.User, text: str):
+def create_new_discussion(database: Session, user: schemas.User, text: str) -> Question:
     "Create a new Q&A in the database."
     discussion = Question(
         created=datetime.now(tz=timezone.utc), text=text, votes=0, user=user.id
@@ -152,15 +141,10 @@ def create_new_discussion(database: Session, user: schemas.User, text: str):
     database.commit()
 
     database.refresh(discussion)
-
-    return {
-        "id": discussion.id,
-        "text": discussion.text,
-        "user": f"{user.first_name} {user.last_name}",
-    }
+    return discussion
 
 
-def qa_vote(database: Session, question: int):
+def qa_vote(database: Session, question: int) -> bool:
     "Increment the vote count on a Q&A in the database."
     if (
         discussion := database.query(Question)
@@ -169,12 +153,13 @@ def qa_vote(database: Session, question: int):
     ) is not None:
         discussion.votes = discussion.votes + 1
         database.commit()
+        return True
+    return False
 
-        return {"qa": question}
-    return {}
 
-
-def qa_comment(database: Session, user: schemas.User, text: str, question: int):
+def qa_comment(
+    database: Session, user: schemas.User, text: str, question: int
+) -> QuestionComment:
     "Add a comment to a Q&A in the database."
     comment = QuestionComment(
         created=datetime.now(tz=timezone.utc),
@@ -191,20 +176,12 @@ def qa_comment(database: Session, user: schemas.User, text: str, question: int):
 
     database.commit()
     database.refresh(comment)
-
-    return {
-        "id": comment.id,
-        "qa": comment.question,
-        "text": comment.text,
-        "user": f"{user.first_name} {user.last_name}",
-    }
+    return comment
 
 
-def qa_delete(database: Session, question: int):
+def qa_delete(database: Session, question: int) -> None:
     "Remove a Q&A from the database."
     the_qa = database.query(Question).filter(Question.id == question).one_or_none()
     if the_qa is not None:
         database.delete(the_qa)
         database.commit()
-
-    return {"qa": question}
