@@ -8,7 +8,7 @@ import { useAppDispatch, useAppSelector } from "./store";
 declare const SERVICE_URL: string;
 
 export type LoginProps = {
-  loggedin: (token: string) => void;
+  loggedin: (_token: string) => void;
   access_token: string | null;
 };
 
@@ -41,7 +41,7 @@ const UserAuthenticatedButtons: React.FC<{}> = () => {
     if (error) {
       dispatch(auth.actions.loggedOut());
     }
-  }, [error]);
+  }, [error, dispatch]);
 
   if (data) {
     return (

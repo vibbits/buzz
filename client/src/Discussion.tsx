@@ -9,15 +9,15 @@ type DiscussionProps = {
   votes: number;
   comments: Comment[];
   vote: () => void;
-  comment: (text: string) => void;
+  comment: (_text: string) => void;
 };
 
-type CommentProps = {
+type CommentViewProps = {
   text: string;
   user: string;
 };
 
-const Comment: React.FC<CommentProps> = ({ text, user }) => {
+const CommentView: React.FC<CommentViewProps> = ({ text, user }) => {
   return (
     <div className="comment-container">
       <span className="comment-author">{user}</span>
@@ -42,7 +42,7 @@ const Votes: React.FC<{ votes: number; vote: () => void }> = ({
   );
 };
 
-const CommentForm: React.FC<{ comment: (text: string) => void }> = ({
+const CommentForm: React.FC<{ comment: (_text: string) => void }> = ({
   comment,
 }) => {
   const [text, setText] = useState("");
@@ -74,7 +74,7 @@ const CommentsView: React.FC<CommentsViewProps> = ({ comments }) => {
     <div className="comment-view">
       <hr className="subtle-hr" />
       {comments.map((comment) => (
-        <Comment key={comment.id} text={comment.text} user={comment.user} />
+        <CommentView key={comment.id} text={comment.text} user={comment.user} />
       ))}
     </div>
   );

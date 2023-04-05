@@ -10,7 +10,7 @@ type PollProps = {
   description: string;
   options: PollOption[];
   votes: { [id: string]: number };
-  selectOption: (option: number) => () => void;
+  selectOption: (_option: number) => () => void;
 };
 
 export const Poll: React.FC<React.PropsWithChildren<PollProps>> = (props) => {

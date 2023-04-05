@@ -56,8 +56,8 @@ type CreatePollOptionProps = {
   option: string | null;
   big: boolean;
   add: () => void;
-  set: (index: number, value: string | null) => void;
-  remove: (index: number) => void;
+  set: (_index: number, _value: string | null) => void;
+  remove: (_index: number) => void;
 };
 
 const CreatePollOption: React.FC<CreatePollOptionProps> = (props) => {
@@ -285,7 +285,7 @@ const QAApp: React.FC<{ cn: string }> = ({ cn }) => {
   );
 };
 
-export default () => {
+const Buzz: React.FC<{}> = () => {
   const [whichApp, setWhichApp] = useState<"poll" | "qa">("poll");
   const isAuthorized: boolean = useAppSelector(
     (state) => state.auth.token !== null
@@ -303,3 +303,5 @@ export default () => {
     </div>
   );
 };
+
+export default Buzz;
