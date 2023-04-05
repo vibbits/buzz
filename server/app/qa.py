@@ -27,7 +27,7 @@ def create_new_discussion(database: Session, user: User, args: Arguments) -> Pac
 
 def vote(database: Session, _user: User, args: Arguments) -> Package:
     "Vote on a question."
-    question = args.get("question")
+    question = args.get("qa")
     if isinstance(question, int):
         return {"qa": question} if crud.qa_vote(database, question) else {}
     return error("type mismatch")
@@ -36,7 +36,7 @@ def vote(database: Session, _user: User, args: Arguments) -> Package:
 def comment(database: Session, user: User, args: Arguments) -> Package:
     "Comment on a question."
     text = args.get("text")
-    question = args.get("question")
+    question = args.get("qa")
     try:
         if isinstance(text, str) and isinstance(question, int):
             qa_comment = crud.qa_comment(database, user, text, question)
@@ -53,7 +53,7 @@ def comment(database: Session, user: User, args: Arguments) -> Package:
 
 def delete(database: Session, _user: User, args: Arguments) -> Package:
     "Delete a whole Q&A."
-    question = args.get("question")
+    question = args.get("qa")
     if isinstance(question, int):
         crud.qa_delete(database, question)
         return {"qa": question}

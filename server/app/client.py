@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 
 class Client:
     "A connected client: tracks useful data for a connected client."
-    id: UUID
+    uid: UUID
     socket: WebSocket
     user: User
 
@@ -42,7 +42,7 @@ def connected(client: Client) -> Message:
     "Construct a message to connected clients that another client has connected."
     return {
         "msg": "connected",
-        "id": str(client.id),
+        "id": str(client.uid),
         "name": client.name,
     }
 
