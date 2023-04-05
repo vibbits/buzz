@@ -1,0 +1,39 @@
+---
+
+on:
+  pull_request:
+    paths:
+      - 'server/**/*.py'
+      - 'server/pyproject.toml'
+      - 'server/poetry.lock'
+  workflow_dispatch:
+
+jobs:
+  defaults:
+    run:
+      working-directory: 'server'
+  quality-checks:
+    runs-on: 'ubuntu-latest'
+
+  steps:
+    - uses: actions/checkout@v3
+
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - uses: Gr1N/setup-poetry@v8
+
+    - name: 'Install dependencies'
+      run: 'poetry install'
+
+    - name: 'Code formatting'
+      run: 'poetry run black --check .'
+
+    - name: 'PyLint'
+      run: 'poetry run pylint app/'
+
+    - name: 'Type checking'
+      run: 'poetry run mypy app/'
+
+...
