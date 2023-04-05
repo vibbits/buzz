@@ -1,12 +1,9 @@
 " Poll control functions and HTTP API "
 
-from itertools import groupby
-
-from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app import crud, deps
-from app.schemas import User, Poll
+from app import crud
+from app.schemas import User
 
 
 def create_new_poll(

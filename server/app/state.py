@@ -15,7 +15,14 @@ router = APIRouter()
 def get_state(
     database: Session = Depends(deps.get_db), _user: User = Depends(deps.current_user)
 ):
+    """
+    Current application state. Including:
+    - Polls
+    - Q&A
+    """
+
     def make_poll(poll):
+        "Create a Poll according to the schema from a ORM object."
         options = [(opt.text, opt.id) for opt in poll.options]
         votes = {
             id: len(list(vals))
@@ -29,19 +36,20 @@ def get_state(
             votes=votes,
         )
 
-    def make_qa(qa):
+    def make_qa(question):
+        "Create a Discussion accoring to the schema from an ORM object."
         return Discussion(
-            id=qa.id,
-            text=qa.text,
-            votes=qa.votes,
-            user=f"{qa.asker.first_name} {qa.asker.last_name}",
+            id=question.id,
+            text=question.text,
+            votes=question.votes,
+            user=f"{question.asker.first_name} {question.asker.last_name}",
             comments=[
                 Comment(
                     id=comment.id,
                     text=comment.text,
                     user=f"{comment.commenter.first_name} {comment.commenter.last_name}",
                 )
-                for comment in qa.comments
+                for comment in question.comments
             ],
         )
 

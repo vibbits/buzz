@@ -1,4 +1,6 @@
 " Data schemas for the HTTP interface "
+# pylint: disable=too-few-public-methods,no-name-in-module
+
 from typing import Literal, Optional, Union
 
 from pydantic import BaseModel
@@ -15,6 +17,7 @@ class User(BaseModel):
     image: Optional[str]
 
     class Config:
+        "Enable ORM mode."
         orm_mode = True
 
 
@@ -59,5 +62,6 @@ class Discussion(BaseModel):
 
 
 class State(BaseModel):
+    "Current application state."
     polls: list[Poll]
     qas: list[Discussion]

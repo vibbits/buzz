@@ -1,17 +1,19 @@
 " Database models: declarative SQL table descriptions "
+# pylint: disable=too-few-public-methods
 
-from sqlalchemy import DateTime, ForeignKey, Integer, JSON, String
+from sqlalchemy import DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
 class Base(DeclarativeBase):
-    pass
+    "Base class for SQLAlchemy."
 
 
 # Authentication
 
 
 class User(Base):
+    "Table recording users."
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(
@@ -29,6 +31,7 @@ class User(Base):
 
 
 class Poll(Base):
+    "Table for recording polls."
     __tablename__ = "polls"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -42,6 +45,7 @@ class Poll(Base):
 
 
 class PollOption(Base):
+    "Table for recording poll options."
     __tablename__ = "poll_options"
 
     id = mapped_column(Integer, primary_key=True)
@@ -50,6 +54,7 @@ class PollOption(Base):
 
 
 class PollVote(Base):
+    "Table for recording votes on polls."
     __tablename__ = "poll_votes"
 
     id = mapped_column(Integer, primary_key=True)
@@ -62,6 +67,7 @@ class PollVote(Base):
 
 
 class Question(Base):
+    "Q&A questions."
     __tablename__ = "questions"
 
     id = mapped_column(Integer, primary_key=True)

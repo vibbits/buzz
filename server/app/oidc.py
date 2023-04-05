@@ -11,6 +11,10 @@ Jwks = dict[str, str]
 
 
 async def token(code: str, redirect: str) -> tuple[Token, Jwks]:
+    """
+    Retrieve token from VIB services given an authorization code from the client.
+    Get VIB Services keys in parallel.
+    """
     async with httpx.AsyncClient() as client:
         [tkn, jwks] = await asyncio.gather(
             asyncio.ensure_future(
@@ -37,6 +41,7 @@ async def token(code: str, redirect: str) -> tuple[Token, Jwks]:
 
 
 async def user_info(access_token: str) -> dict[str, str]:
+    "Retrieve authenticated user information from VIB Services."
     async with httpx.AsyncClient() as client:
         info = await client.get(
             "https://services.vib.be/connect/userinfo",

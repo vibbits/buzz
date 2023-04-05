@@ -10,10 +10,15 @@ from app.schemas import User
 
 
 class AuthorizationError(Exception):
-    pass
+    "An error arrising from authorizing a user from a bearer token."
 
 
 def user_from_token(token: str) -> User:
+    """
+    Check user authorization from a bearer token.
+    Return user information on success.
+    Throw an error if authorization fails.
+    """
     try:
         payload = jwt.decode(token, settings.api_secret, "HS256")
     except JOSEError as err:

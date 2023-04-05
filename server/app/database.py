@@ -23,12 +23,14 @@ Session = sessionmaker(
 
 
 def build() -> None:
+    "Manually rebuild a fresh database."
     with Session() as database:
         Base.metadata.drop_all(database.get_bind())
         Base.metadata.create_all(database.get_bind())
 
 
 def admin() -> None:
+    "Application/database administration user interface."
     parser = argparse.ArgumentParser(description="Database administration interface")
     parser.add_argument("operation", type=str, help="Database operation")
     parser.add_argument(
