@@ -8,6 +8,7 @@ import { Welcome } from "./Welcome";
 import { Poll as ViewPoll } from "./Poll";
 import { ButtonTab } from "./ButtonTab";
 import { Discussion as ViewDiscussion } from "./Discussion";
+import { Notifications } from "./Notifications";
 import "./Buzz.css";
 
 const selectPollOption = (poll: number) => (option: number) => () => {
@@ -296,6 +297,7 @@ const Buzz: React.FC<{}> = () => {
   }
   return (
     <div className="buzz-ui-container">
+      <Notifications />
       <ButtonTab app={whichApp} change={setWhichApp} />
       <PollApp cn={whichApp !== "poll" ? "hide-on-mobile" : ""} />
       <div style={{ width: "2px", background: "#ccc" }}></div>
