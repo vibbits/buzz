@@ -142,7 +142,7 @@ export const getSocket = (): WebSocket => {
         notifications.actions.notify({
           level: "error",
           title: "Disconnected",
-          text: "You have been disconnected.",
+          text: "You have been disconnected. You should try to reload your browser.",
           actions: [{ action: "reload", display: "Reload" }],
         })
       );
