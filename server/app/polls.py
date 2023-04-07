@@ -55,7 +55,10 @@ def vote(database: Session, user: User, args: Arguments) -> Package:
     poll = args.get("poll")
     option = args.get("option")
     if isinstance(poll, int) and isinstance(option, int):
-        crud.poll_vote(database, user.id, poll, option)
-        return {"poll": poll, "option": option}
+        try:
+            result = crud.poll_vote(database, user.id, poll, option)
+            return {"poll": poll, "option": option, "op": "+" if result else "-"}
+        except Exception as err:
+            return error(f"Recording vote: {err}")
 
     return error("type mismatch")

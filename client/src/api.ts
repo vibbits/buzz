@@ -93,6 +93,7 @@ type PollVoteMessage = {
   msg: "poll_vote";
   poll: number;
   option: number;
+  op: "+" | "-";
 };
 
 type AuthMessage = {
@@ -149,6 +150,14 @@ export const getSocket = (): WebSocket => {
     });
   }
   return socket;
+};
+
+const pollVoteOp = (voteCount: number | undefined, op: "+" | "-"): number => {
+  if (voteCount !== undefined) {
+    return voteCount + (op === "+" ? 1 : -1);
+  } else {
+    return op === "+" ? 1 : 0;
+  }
 };
 
 const baseQuery = retry(
@@ -257,11 +266,10 @@ export const api = createApi({
                       .indexOf(message.poll);
                     const poll = draft.polls[i];
                     if (poll !== undefined) {
-                      if (poll.votes[message.option] !== undefined) {
-                        poll.votes[message.option]++;
-                      } else {
-                        poll.votes[message.option] = 1;
-                      }
+                      poll.votes[message.option] = pollVoteOp(
+                        poll.votes[message.option],
+                        message.op
+                      );
                     }
                     return draft;
                   });
