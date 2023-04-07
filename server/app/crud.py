@@ -108,7 +108,7 @@ def poll_vote(database: Session, uid: int, poll: int, option: int) -> bool:
     return True.
     """
     if (
-        existing_vote := database.query(PollVote)
+        database.query(PollVote)
         .filter(PollVote.poll == poll, PollVote.option == option)
         .all()
     ) == []:
@@ -122,11 +122,11 @@ def poll_vote(database: Session, uid: int, poll: int, option: int) -> bool:
 
         database.commit()
         return True
-    else:
-        database.query(PollVote).filter(
-            PollVote.poll == poll, PollVote.option == option
-        ).delete()
-        return False
+
+    database.query(PollVote).filter(
+        PollVote.poll == poll, PollVote.option == option
+    ).delete()
+    return False
 
 
 # Discussions / Q&A

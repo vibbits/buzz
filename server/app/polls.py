@@ -58,7 +58,7 @@ def vote(database: Session, user: User, args: Arguments) -> Package:
         try:
             result = crud.poll_vote(database, user.id, poll, option)
             return {"poll": poll, "option": option, "op": "+" if result else "-"}
-        except Exception as err:
+        except Exception as err:  # pylint: disable=broad-exception-caught
             return error(f"Recording vote: {err}")
 
     return error("type mismatch")
