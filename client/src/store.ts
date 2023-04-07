@@ -3,12 +3,13 @@ import { useDispatch, useSelector } from "react-redux";
 import type { TypedUseSelectorHook } from "react-redux";
 
 import { api } from "./api";
-import { auth } from "./reducers";
+import { auth, notifications } from "./reducers";
 
 export const store = configureStore({
   reducer: {
     [api.reducerPath]: api.reducer,
     [auth.name]: auth.reducer,
+    [notifications.name]: notifications.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(api.middleware),

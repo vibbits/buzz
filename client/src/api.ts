@@ -2,7 +2,9 @@ import { createApi, fetchBaseQuery, retry } from "@reduxjs/toolkit/query/react";
 import type { FetchArgs } from "@reduxjs/toolkit/query";
 import * as R from "ramda";
 
-import { RootState } from "./store";
+import { notifications } from "./reducers";
+import { store } from "./store";
+import type { RootState } from "./store";
 
 declare const SERVICE_URL: string;
 declare const WEBSOCKET_URL: string;
@@ -124,10 +126,26 @@ export const getSocket = (): WebSocket => {
     socket.addEventListener("error", (error) => {
       clearInterval(serverPing);
       console.log("Websocket error: ", error);
+      store.dispatch(
+        notifications.actions.notify({
+          level: "error",
+          title: "Connection error",
+          text: JSON.stringify(error),
+          actions: [{ action: "reload", display: "Reload" }],
+        })
+      );
     });
     socket.addEventListener("close", (event) => {
       clearInterval(serverPing);
       console.log("Websocket closed: ", event);
+      store.dispatch(
+        notifications.actions.notify({
+          level: "error",
+          title: "Disconnected",
+          text: "You have been disconnected. You should try to reload your browser.",
+          actions: [{ action: "reload", display: "Reload" }],
+        })
+      );
     });
   }
   return socket;
