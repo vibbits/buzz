@@ -101,17 +101,32 @@ def delete_poll(database: Session, poll: int) -> None:
         database.commit()
 
 
-def poll_vote(database: Session, uid: int, poll: int, option: int) -> None:
-    "Add a vote to a poll in the database."
-    vote = PollVote(option=option, poll=poll, user=uid)
+def poll_vote(database: Session, uid: int, poll: int, option: int) -> bool:
+    """
+    Add a vote to a poll in the database.
+    If the vote already exists, delete it and return False. Otherwise add the vote and
+    return True.
+    """
+    if (
+        database.query(PollVote)
+        .filter(PollVote.poll == poll, PollVote.option == option)
+        .all()
+    ) == []:
+        vote = PollVote(option=option, poll=poll, user=uid)
 
-    try:
-        database.add(vote)
-    except SQLAlchemyError as err:
-        database.rollback()
-        raise err
+        try:
+            database.add(vote)
+        except SQLAlchemyError as err:
+            database.rollback()
+            raise err
 
-    database.commit()
+        database.commit()
+        return True
+
+    database.query(PollVote).filter(
+        PollVote.poll == poll, PollVote.option == option
+    ).delete()
+    return False
 
 
 # Discussions / Q&A
