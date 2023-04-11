@@ -4,7 +4,7 @@ from typing import Optional
 from datetime import datetime, timezone
 
 from sqlalchemy import desc
-from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app import schemas
