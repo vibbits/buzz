@@ -1,7 +1,7 @@
 " Database models: declarative SQL table descriptions "
 # pylint: disable=too-few-public-methods
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String
+from sqlalchemy import DateTime, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -56,6 +56,9 @@ class PollOption(Base):
 class PollVote(Base):
     "Table for recording votes on polls."
     __tablename__ = "poll_votes"
+    __table_args__ = (
+        UniqueConstraint("option", "poll", "user", name="one_vote_per_user_per_option"),
+    )
 
     id = mapped_column(Integer, primary_key=True)
     option = mapped_column(Integer, ForeignKey("poll_options.id"), nullable=False)

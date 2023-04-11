@@ -56,8 +56,9 @@ def vote(database: Session, user: User, args: Arguments) -> Package:
     option = args.get("option")
     if isinstance(poll, int) and isinstance(option, int):
         try:
-            result = crud.poll_vote(database, user.id, poll, option)
-            return {"poll": poll, "option": option, "op": "+" if result else "-"}
+            crud.poll_vote(database, user.id, poll, option)
+            votes = crud.poll_votes(database, poll, option)
+            return {"poll": poll, "option": option, "count": len(votes)}
         except Exception as err:  # pylint: disable=broad-exception-caught
             return error(f"Recording vote: {err}")
 
