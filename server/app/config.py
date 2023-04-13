@@ -13,7 +13,8 @@ class Settings(BaseSettings):
     api_secret: str = secrets.token_urlsafe(32)
     api_token_expire: int = 12 * 60  # 12 hours in minutes
 
-    database_uri: str = "sqlite:///buzz.sqlite"
+    backup_database_uri: str = "sqlite:///buzz.sqlite"
+    database_uri: str = "sqlite:///:memory:"
 
 
 settings = Settings()

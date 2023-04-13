@@ -109,9 +109,7 @@ def poll_vote(database: Session, uid: int, poll: int, option: int) -> None:
     try:
         if (
             vote := database.query(PollVote)
-            .filter(
-                PollVote.poll == poll, PollVote.user == uid, PollVote.option == option
-            )
+            .filter(PollVote.user == uid, PollVote.option == option)
             .one_or_none()
         ) is None:
             database.add(PollVote(option=option, poll=poll, user=uid))
