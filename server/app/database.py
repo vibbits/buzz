@@ -5,6 +5,7 @@ from rich.console import Console
 from rich.table import Table
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
 from app import crud
 from app.config import settings
@@ -15,6 +16,7 @@ engine = create_engine(
     future=True,
     echo=False,
     connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
 )
 
 Session = sessionmaker(
