@@ -26,7 +26,10 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     Backup the :memory: database on shutdown.
     See: https://www.sqlite.org/backup.html
     """
-    path = "." + urlparse(settings.backup_database_uri).path
+    if urlparse(settings.backup_database_uri).path.startswith("//"):
+        path = urlparse(settings.backup_database_uri).path
+    else:
+        path = "." + urlparse(settings.backup_database_uri).path
     live_database_connection = database.engine.raw_connection().driver_connection
 
     if ":memory:" in settings.database_uri:
