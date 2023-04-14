@@ -19,7 +19,7 @@ RUN apt-get update \
     # cleanup
     && rm -rf /var/lib/apt/lists/*
 
-RUN poetry install --no-interaction --no-ansi -vvv
+RUN poetry install --only=main --no-interaction --no-ansi -vvv
 
 FROM python-base as runtime
 WORKDIR /buzz
