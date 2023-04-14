@@ -37,7 +37,11 @@ export const Poll: React.FC<React.PropsWithChildren<PollProps>> = (props) => {
             <ViewPollOption
               key={option[1]}
               label={option[0]}
-              size={numVotes === undefined ? 0 : numVotes / maxVotes}
+              size={
+                numVotes === undefined || maxVotes === 0
+                  ? 0
+                  : numVotes / maxVotes
+              }
               count={numVotes === undefined ? 0 : numVotes}
               selectOption={props.selectOption(option[1])}
             />
