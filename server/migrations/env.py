@@ -63,7 +63,9 @@ def run_migrations_online() -> None:
     """
     engine = create_engine(settings.backup_database_uri, future=True, echo=False)
     with engine.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(
+            connection=connection, target_metadata=target_metadata, render_as_batch=True
+        )
 
         with context.begin_transaction():
             context.run_migrations()

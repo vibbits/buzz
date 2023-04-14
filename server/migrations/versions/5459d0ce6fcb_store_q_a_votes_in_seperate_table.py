@@ -33,9 +33,12 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("question", "user", name="one_vote_per_user"),
     )
-    op.drop_column("questions", "votes")
+
+    with op.batch_alter_table("questions") as batch_op:
+        batch_op.drop_column("votes")
 
 
 def downgrade() -> None:
-    op.add_column("questions", sa.Column("votes", sa.INTEGER(), nullable=False))
+    with op.batch_alter_table("questions") as batch_op:
+        batch_op.add_column(sa.Column("votes", sa.INTEGER(), nullable=False))
     op.drop_table("question_votes")
