@@ -11,11 +11,7 @@ handle_path /api/v1/* {
 handle {
   root * /srv
   encode gzip
-  @static {
-    file
-    path *.js *.css *.svg
-  }
-  header @static Cache-Control max-age=31536000, immutable
+  header Cache-Control max-age=31536000, immutable
   try_files {path} /index.html
   file_server
 }
