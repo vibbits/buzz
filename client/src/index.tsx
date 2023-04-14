@@ -44,7 +44,7 @@ const AppHeader = () => {
           className="vib-app-logo"
           src={Logo}
           alt="Buzz Logo"
-          style={{ maxHeight: "90px" }}
+          style={{ width: "68px", height: "90px" }}
         />
 
         <input type="checkbox" id="vib-toggle-menu" />
