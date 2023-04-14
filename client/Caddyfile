@@ -10,6 +10,7 @@ handle_path /api/v1/* {
 
 handle {
   root * /srv
+  encode gzip
   try_files {path} /index.html
   file_server
 }
