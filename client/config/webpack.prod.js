@@ -22,7 +22,9 @@ module.exports = {
       SERVICE_URL: JSON.stringify("https://buzz.vib.be/api/v1"),
       WEBSOCKET_URL: JSON.stringify("wss://buzz.vib.be/api/v1/ws"),
     }),
-    new MiniCssExtractPlugin(),
+    new MiniCssExtractPlugin({
+      filename: "[name].[contenthash].css",
+    }),
   ],
   optimization: {
     minimize: true,
@@ -34,7 +36,9 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, "../dist"),
-    filename: "[name].bundle.js",
+    filename: "[name].[contenthash].js",
+    assetModuleFilename: "[name].[contenthash][ext][query]",
+    chunkFilename: "[name].[contenthash].js",
     clean: true,
   },
   module: {
