@@ -8,7 +8,6 @@ import logging
 import sqlite3
 from urllib.parse import urlparse
 
-import uvicorn
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -69,5 +68,7 @@ print(settings.dict())
 
 
 def main() -> None:
-    "Launched with `poetry run start` at server root level"
+    "Launched with `poetry run start` at server root level (development only)"
+    import uvicorn  # pylint: disable=import-outside-toplevel
+
     uvicorn.run("app.main:app", host="0.0.0.0", reload=True)
