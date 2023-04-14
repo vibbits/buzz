@@ -29,7 +29,7 @@
     "react-router-dom": "^6.9.0"
   },
   "devDependencies": {
-    "@types/ramda": "^0.28.23",
+    "@types/ramda": "^0.29.0",
     "@types/react-dom": "^18.0.11",
     "@types/react-redux": "^7.1.25",
     "@typescript-eslint/eslint-plugin": "^5.55.0",
