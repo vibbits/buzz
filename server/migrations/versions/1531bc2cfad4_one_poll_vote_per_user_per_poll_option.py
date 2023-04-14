@@ -16,24 +16,18 @@ branch_labels = None
 depends_on = None
 
 
-def remove_duplicates(session):
-    from app.models import PollVote
-
-    unique = session.query(PollVote.id).group_by(
-        PollVote.poll, PollVote.user, PollVote.option
-    )
-
-    duplicates = session.query(PollVote).filter(~PollVote.id.in_(unique))
-    for dup in duplicates:
-        session.delete(dup)
-    session.commit()
-
-
 def upgrade() -> None:
-    from app.database import Session
-
-    with Session() as session:
-        remove_duplicates(session)
+    # Remove duplicates
+    op.execute(
+        """DELETE FROM poll_votes
+WHERE id IN (SELECT pv2.id
+              FROM   poll_votes pv2
+              WHERE  pv2.id NOT IN (SELECT pv.id
+                                    FROM   poll_votes pv
+                                    GROUP  BY pv.poll,
+                                              pv."user",
+                                              pv."option"))"""
+    )
 
     with op.batch_alter_table("poll_votes") as batch_op:
         batch_op.create_unique_constraint(
