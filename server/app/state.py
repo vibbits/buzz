@@ -42,7 +42,7 @@ def get_state(
         return Discussion(
             id=question.id,
             text=question.text,
-            votes=question.votes,
+            votes=len(question.votes),
             user=f"{question.asker.first_name} {question.asker.last_name}",
             comments=[
                 Comment(

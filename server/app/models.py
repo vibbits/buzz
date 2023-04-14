@@ -75,10 +75,13 @@ class Question(Base):
 
     id = mapped_column(Integer, primary_key=True)
     text = mapped_column(String, nullable=False)
-    votes = mapped_column(Integer, nullable=False)
     created = mapped_column(DateTime, nullable=False)
     user = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
     asker: Mapped[User] = relationship("User")
+    votes: Mapped[list["QuestionVote"]] = relationship(
+        "QuestionVote",
+        cascade="all, delete",
+    )
     comments: Mapped[list["QuestionComment"]] = relationship(
         "QuestionComment",
         cascade="all, delete",
@@ -96,3 +99,13 @@ class QuestionComment(Base):
     question = mapped_column(Integer, ForeignKey("questions.id"), nullable=False)
     user = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
     commenter: Mapped[User] = relationship("User")
+
+
+class QuestionVote(Base):
+    "Table for recording votes on questions."
+    __tablename__ = "question_votes"
+    __table_args__ = (UniqueConstraint("question", "user", name="one_vote_per_user"),)
+
+    id = mapped_column(Integer, primary_key=True)
+    question = mapped_column(Integer, ForeignKey("questions.id"), nullable=False)
+    user = mapped_column(Integer, ForeignKey("users.id"), nullable=False)

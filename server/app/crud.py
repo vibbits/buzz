@@ -8,7 +8,15 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app import schemas
-from app.models import User, Poll, PollOption, PollVote, Question, QuestionComment
+from app.models import (
+    User,
+    Poll,
+    PollOption,
+    PollVote,
+    Question,
+    QuestionComment,
+    QuestionVote,
+)
 
 # Auth
 
@@ -136,17 +144,13 @@ def poll_votes(database: Session, poll: int, option: int) -> list[PollVote]:
 
 def all_discussions(database: Session) -> list[Question]:
     "Retrieve all Q&As form the database."
-    return (
-        database.query(Question)
-        .order_by(desc(Question.created), desc(Question.votes))
-        .all()
-    )
+    return database.query(Question).order_by(desc(Question.created)).all()
 
 
 def create_new_discussion(database: Session, user: schemas.User, text: str) -> Question:
     "Create a new Q&A in the database."
     discussion = Question(
-        created=datetime.now(tz=timezone.utc), text=text, votes=0, user=user.id
+        created=datetime.now(tz=timezone.utc), text=text, user=user.id
     )
 
     try:
@@ -161,17 +165,30 @@ def create_new_discussion(database: Session, user: schemas.User, text: str) -> Q
     return discussion
 
 
-def qa_vote(database: Session, question: int) -> bool:
-    "Increment the vote count on a Q&A in the database."
-    if (
-        discussion := database.query(Question)
-        .filter(Question.id == question)
-        .one_or_none()
-    ) is not None:
-        discussion.votes = discussion.votes + 1
+def qa_votes(database: Session, question: int) -> list[QuestionVote]:
+    "Retrieve the votes for a given Q&A"
+    return database.query(QuestionVote).filter(QuestionVote.question == question).all()
+
+
+def qa_vote(database: Session, uid: int, question: int) -> None:
+    """
+    Add a vote to a question in the database.
+    If the vote already exists, delete it.
+    """
+    try:
+        if (
+            vote := database.query(QuestionVote)
+            .filter(QuestionVote.user == uid, QuestionVote.question == question)
+            .one_or_none()
+        ) is None:
+            database.add(QuestionVote(question=question, user=uid))
+        else:
+            database.delete(vote)
+
         database.commit()
-        return True
-    return False
+    except SQLAlchemyError as err:
+        database.rollback()
+        raise err
 
 
 def qa_comment(
