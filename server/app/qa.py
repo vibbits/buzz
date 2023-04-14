@@ -25,11 +25,13 @@ def create_new_discussion(database: Session, user: User, args: Arguments) -> Pac
         return error(str(err))
 
 
-def vote(database: Session, _user: User, args: Arguments) -> Package:
+def vote(database: Session, user: User, args: Arguments) -> Package:
     "Vote on a question."
     question = args.get("qa")
     if isinstance(question, int):
-        return {"qa": question} if crud.qa_vote(database, question) else {}
+        crud.qa_vote(database, user.id, question)
+        votes = crud.qa_votes(database, question)
+        return {"qa": question, "count": len(votes)}
     return error("type mismatch")
 
 

@@ -60,7 +60,8 @@ type NewDiscussionMessage = {
 
 type DiscussionVoteMessage = {
   msg: "qa_vote";
-  qa?: number;
+  qa: number;
+  count: number;
 };
 
 type DiscussionCommentMessage = {
@@ -292,7 +293,7 @@ export const api = createApi({
                         .indexOf(message.qa);
                       const qa = state.qas[i];
                       if (qa !== undefined) {
-                        qa.votes += 1;
+                        qa.votes = message.count;
                       }
                     }
                     return state;
