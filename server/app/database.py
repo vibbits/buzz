@@ -38,8 +38,14 @@ def admin() -> None:
     parser.add_argument(
         "-u", "--user", type=int, required=False, help="User to operate on"
     )
+    parser.add_argument(
+        "-n", "--user_name", type=str, required=False, help="Name of the user to operate on"
+    )
 
     args = parser.parse_args()
+
+    admin_engine = create_engine(settings.backup_database_uri, future=True, echo=False)
+    Admin_Session = sessionmaker(bind=admin_engine)
 
     if args.operation == "list_users":
         table = Table(title="Users")
@@ -47,7 +53,7 @@ def admin() -> None:
         table.add_column("Name")
         table.add_column("Role", justify="right")
 
-        with Session() as database:
+        with Admin_Session() as database:
             for user in database.query(User).all():
                 table.add_row(
                     str(user.id), f"{user.first_name} {user.last_name}", user.role
@@ -56,5 +62,9 @@ def admin() -> None:
         console = Console()
         console.print(table)
     elif args.operation == "promote_user":
-        with Session() as database:
+        with Admin_Session() as database:
             crud.promote(database, args.user)
+
+    elif args.operation == "create_user":
+        with Admin_Session() as database:
+            crud.create_user(database, args.user, *(args.user_name.split(" ", 1)), None)
