@@ -73,11 +73,14 @@ def all_polls(database: Session) -> list[Poll]:
 
 
 def create_new_poll(
-    database: Session, title: str, description: str, options: list[str]
+    database: Session, title: str, description: str, hidden: bool, options: list[str]
 ) -> Poll:
     "Create a new poll in the database."
     poll = Poll(
-        created=datetime.now(tz=timezone.utc), title=title, description=description
+        created=datetime.now(tz=timezone.utc),
+        title=title,
+        description=description,
+        hidden=hidden,
     )
 
     try:
@@ -107,6 +110,36 @@ def delete_poll(database: Session, poll: int) -> None:
     if the_poll is not None:
         database.delete(the_poll)
         database.commit()
+
+
+def hide_poll(database: Session, poll: int) -> None:
+    """
+    Show poll in the database.
+    """
+    db_poll = database.query(Poll).filter(Poll.id == poll).one_or_none()
+
+    try:
+        if db_poll is not None:
+            db_poll.hidden = True
+        database.commit()
+    except SQLAlchemyError as err:
+        database.rollback()
+        raise err
+
+
+def show_poll(database: Session, poll: int) -> None:
+    """
+    Show poll in the database.
+    """
+    db_poll = database.query(Poll).filter(Poll.id == poll).one_or_none()
+
+    try:
+        if db_poll is not None:
+            db_poll.hidden = False
+        database.commit()
+    except SQLAlchemyError as err:
+        database.rollback()
+        raise err
 
 
 def poll_vote(database: Session, uid: int, poll: int, option: int) -> None:

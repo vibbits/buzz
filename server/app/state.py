@@ -33,6 +33,7 @@ def get_state(
             id=poll.id,
             title=poll.title,
             description=poll.description,
+            hidden=poll.hidden,
             options=options,
             votes=votes,
         )

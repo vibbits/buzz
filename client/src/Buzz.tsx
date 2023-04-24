@@ -22,14 +22,31 @@ const selectPollOption = (poll: number) => (option: number) => () => {
   );
 };
 
-const createPoll = (title: string, description: string, options: string[]) => {
+const createPoll = (
+  title: string,
+  description: string,
+  hidden: boolean,
+  options: string[]
+) => {
   const socket = getSocket();
-  socket.send(JSON.stringify({ msg: "new_poll", title, description, options }));
+  socket.send(
+    JSON.stringify({ msg: "new_poll", title, description, hidden, options })
+  );
 };
 
 const deletePoll = (poll_id: number) => {
   const socket = getSocket();
   socket.send(JSON.stringify({ msg: "delete_poll", poll_id }));
+};
+
+const hidePoll = (poll_id: number) => {
+  const socket = getSocket();
+  socket.send(JSON.stringify({ msg: "poll_hide", poll_id }));
+};
+
+const showPoll = (poll_id: number) => {
+  const socket = getSocket();
+  socket.send(JSON.stringify({ msg: "poll_show", poll_id }));
 };
 
 const createQA = (text: string) => {
@@ -139,6 +156,7 @@ const CreatePollButton: React.FC<{}> = () => {
   const [pressed, setPressed] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [hidden, setHidden] = useState(true);
   const [options, setOptions] = useState<Array<string | null>>([null, null]);
 
   if (pressed) {
@@ -163,6 +181,14 @@ const CreatePollButton: React.FC<{}> = () => {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
+        <label>
+          <input
+            type="checkbox"
+            checked={hidden}
+            onClick={() => setHidden((h) => !h)}
+          />
+          hidden?
+        </label>
         <CreatePollOptions options={options} modify={setOptions} />
         <div>
           <button onClick={() => setPressed(false)}>Cancel</button>
@@ -172,6 +198,7 @@ const CreatePollButton: React.FC<{}> = () => {
               createPoll(
                 title,
                 description,
+                hidden,
                 options.filter((o) => o !== null) as string[]
               );
             }}
@@ -206,6 +233,36 @@ const AdminDeleteButton: React.FC<{ deleteFn: () => void }> = ({
   return null;
 };
 
+const AdminHideButton: React.FC<{
+  hideFn: () => void;
+  showFn: () => void;
+  hidden: boolean;
+}> = ({ hideFn, showFn, hidden }) => {
+  const { data } = useMeQuery();
+
+  const clickHandler = () => {
+    if (hidden) {
+      showFn();
+    } else {
+      hideFn();
+    }
+  };
+
+  if (data && data.role === "admin") {
+    return (
+      <button
+        className="flat-ui-button"
+        style={{ position: "absolute", right: "2rem" }}
+        onClick={clickHandler}
+      >
+        {hidden ? "👀" : "😴"}
+      </button>
+    );
+  }
+
+  return null;
+};
+
 const PollApp: React.FC<{ cn: string }> = ({ cn }) => {
   const { data } = useStateQuery();
   const me = useMeQuery();
@@ -215,18 +272,25 @@ const PollApp: React.FC<{ cn: string }> = ({ cn }) => {
       <h2 className="hide-on-mobile">Polls</h2>
       {me?.data?.role === "admin" ? <CreatePollButton /> : null}
       <div className="app-interaction-container">
-        {data?.polls.map((poll: Poll) => (
-          <ViewPoll
-            key={poll.id}
-            title={poll.title}
-            description={poll.description}
-            options={poll.options}
-            votes={poll.votes}
-            selectOption={selectPollOption(poll.id)}
-          >
-            <AdminDeleteButton deleteFn={() => deletePoll(poll.id)} />
-          </ViewPoll>
-        ))}
+        {data?.polls
+          .filter((poll: Poll) => me?.data?.role === "admin" || !poll.hidden)
+          .map((poll: Poll) => (
+            <ViewPoll
+              key={poll.id}
+              title={poll.title}
+              description={poll.description}
+              options={poll.options}
+              votes={poll.votes}
+              selectOption={selectPollOption(poll.id)}
+            >
+              <AdminDeleteButton deleteFn={() => deletePoll(poll.id)} />
+              <AdminHideButton
+                hideFn={() => hidePoll(poll.id)}
+                showFn={() => showPoll(poll.id)}
+                hidden={poll.hidden}
+              />
+            </ViewPoll>
+          ))}
       </div>
     </section>
   );

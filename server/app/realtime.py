@@ -42,6 +42,8 @@ dispatch: dict[
     "ping": ("user", pong_response),
     "new_poll": ("admin", polls.create_new_poll),
     "delete_poll": ("admin", polls.delete_poll),
+    "poll_hide": ("admin", polls.hide_poll),
+    "poll_show": ("admin", polls.show_poll),
     "poll_vote": ("user", polls.vote),
     "new_qa": ("user", qa.create_new_discussion),
     "qa_vote": ("user", qa.vote),
