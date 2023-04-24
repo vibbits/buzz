@@ -39,7 +39,11 @@ def admin() -> None:
         "-u", "--user", type=int, required=False, help="User to operate on"
     )
     parser.add_argument(
-        "-n", "--user_name", type=str, required=False, help="Name of the user to operate on"
+        "-n",
+        "--user_name",
+        type=str,
+        required=False,
+        help="Name of the user to operate on",
     )
 
     args = parser.parse_args()
