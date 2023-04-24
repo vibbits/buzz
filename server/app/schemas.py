@@ -41,6 +41,7 @@ class Poll(BaseModel):
     id: int
     title: str
     description: str
+    hidden: bool
     options: list[tuple[str, int]]
     votes: dict[int, int]
 

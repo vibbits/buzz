@@ -28,6 +28,7 @@ export type Poll = {
   id: number;
   title: string;
   description: string;
+  hidden: boolean;
   options: PollOption[];
   votes: { [id: string]: number };
 };
@@ -82,12 +83,23 @@ type NewPollMessage = {
   id: number;
   title: string;
   description: string;
+  hidden: boolean;
   options: Array<[text: string, id: number]>;
 };
 
 type DeletePollMessage = {
   msg: "delete_poll";
   poll_id?: number;
+};
+
+type HidePollMessage = {
+  msg: "poll_hide";
+  poll_id: number;
+};
+
+type ShowPollMessage = {
+  msg: "poll_show";
+  poll_id: number;
 };
 
 type PollVoteMessage = {
@@ -112,6 +124,8 @@ type Message =
   | NewPollMessage
   | DeletePollMessage
   | PollVoteMessage
+  | HidePollMessage
+  | ShowPollMessage
   | NewDiscussionMessage
   | DiscussionVoteMessage
   | DiscussionCommentMessage
@@ -227,6 +241,7 @@ export const api = createApi({
                         id: message.id,
                         title: message.title,
                         description: message.description,
+                        hidden: message.hidden,
                         options: message.options,
                         votes: {},
                       },
@@ -250,6 +265,39 @@ export const api = createApi({
                   }
                 }
                 break;
+
+              case "poll_hide":
+                {
+                  updateCachedData((draft) => {
+                    const i = draft.polls
+                      .map((poll) => poll.id)
+                      .indexOf(message.poll_id);
+                    const poll = draft.polls[i];
+                    if (poll !== undefined) {
+                      poll.hidden=true;
+                    }
+                    return draft;
+                  });
+                }
+                break;
+
+              case "poll_show":
+                  {
+                    updateCachedData((draft) => {
+                      const i = draft.polls
+                        .map((poll) => poll.id)
+                        .indexOf(message.poll_id);
+                      const poll = draft.polls[i];
+                      if (poll !== undefined) {
+                        poll.hidden=false;
+                      }
+                      return draft;
+                    });
+                  }
+                  break;
+
+              
+              
 
               case "poll_vote":
                 {

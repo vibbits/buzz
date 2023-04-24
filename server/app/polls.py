@@ -17,6 +17,7 @@ def create_new_poll(
     "Create a new poll in the database and format a reponse."
     title = args.get("title")
     description = args.get("description")
+    hidden = args.get("hidden")
     options = args.get("options")
 
     try:
@@ -24,13 +25,15 @@ def create_new_poll(
             isinstance(title, str)
             and isinstance(description, str)
             and isinstance(options, list)
+            and isinstance(hidden, bool)
             and all(isinstance(option, str) for option in options)
         ):
-            poll = crud.create_new_poll(database, title, description, options)
+            poll = crud.create_new_poll(database, title, description, hidden, options)
             return {
                 "id": poll.id,
                 "title": poll.title,
                 "description": poll.description,
+                "hidden": poll.hidden,
                 "options": [(opt.text, opt.id) for opt in poll.options],
             }
 
@@ -45,6 +48,26 @@ def delete_poll(database: Session, _user: User, args: Arguments) -> Package:
 
     if isinstance(poll_id, int):
         crud.delete_poll(database, poll_id)
+        return {"poll_id": poll_id}
+
+    return error("type mismatch")
+
+def hide_poll(database: Session, _user: User, args: Arguments) -> Package:
+    
+    poll_id = args.get("poll_id")
+
+    if isinstance(poll_id, int):
+        crud.hide_poll(database, poll_id)
+        return {"poll_id": poll_id}
+
+    return error("type mismatch")
+
+    
+def show_poll(database: Session, _user: User, args: Arguments) -> Package:
+    poll_id = args.get("poll_id")
+
+    if isinstance(poll_id, int):
+        crud.show_poll(database, poll_id)
         return {"poll_id": poll_id}
 
     return error("type mismatch")

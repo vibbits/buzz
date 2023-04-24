@@ -1,7 +1,7 @@
 " Database models: declarative SQL table descriptions "
 # pylint: disable=too-few-public-methods
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import DateTime, ForeignKey, Integer, String, UniqueConstraint, Boolean
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -38,6 +38,7 @@ class Poll(Base):
     created = mapped_column(DateTime, nullable=False)
     title = mapped_column(String, nullable=False)
     description = mapped_column(String)
+    hidden = mapped_column(Boolean, nullable=False)
     options: Mapped[list["PollOption"]] = relationship(
         "PollOption", cascade="all, delete"
     )
