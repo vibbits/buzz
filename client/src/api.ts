@@ -274,7 +274,7 @@ export const api = createApi({
                       .indexOf(message.poll_id);
                     const poll = draft.polls[i];
                     if (poll !== undefined) {
-                      poll.hidden=true;
+                      poll.hidden = true;
                     }
                     return draft;
                   });
@@ -282,22 +282,19 @@ export const api = createApi({
                 break;
 
               case "poll_show":
-                  {
-                    updateCachedData((draft) => {
-                      const i = draft.polls
-                        .map((poll) => poll.id)
-                        .indexOf(message.poll_id);
-                      const poll = draft.polls[i];
-                      if (poll !== undefined) {
-                        poll.hidden=false;
-                      }
-                      return draft;
-                    });
-                  }
-                  break;
-
-              
-              
+                {
+                  updateCachedData((draft) => {
+                    const i = draft.polls
+                      .map((poll) => poll.id)
+                      .indexOf(message.poll_id);
+                    const poll = draft.polls[i];
+                    if (poll !== undefined) {
+                      poll.hidden = false;
+                    }
+                    return draft;
+                  });
+                }
+                break;
 
               case "poll_vote":
                 {
