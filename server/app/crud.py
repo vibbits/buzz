@@ -77,7 +77,10 @@ def create_new_poll(
 ) -> Poll:
     "Create a new poll in the database."
     poll = Poll(
-        created=datetime.now(tz=timezone.utc), title=title, description=description, hidden=hidden
+        created=datetime.now(tz=timezone.utc),
+        title=title,
+        description=description,
+        hidden=hidden,
     )
 
     try:
@@ -122,7 +125,8 @@ def hide_poll(database: Session, poll: int) -> None:
     except SQLAlchemyError as err:
         database.rollback()
         raise err
-    
+
+
 def show_poll(database: Session, poll: int) -> None:
     """
     Show poll in the database.
@@ -136,6 +140,7 @@ def show_poll(database: Session, poll: int) -> None:
     except SQLAlchemyError as err:
         database.rollback()
         raise err
+
 
 def poll_vote(database: Session, uid: int, poll: int, option: int) -> None:
     """

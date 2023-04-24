@@ -52,8 +52,9 @@ def delete_poll(database: Session, _user: User, args: Arguments) -> Package:
 
     return error("type mismatch")
 
+
 def hide_poll(database: Session, _user: User, args: Arguments) -> Package:
-    
+    "Hide a poll from the database and format a response."
     poll_id = args.get("poll_id")
 
     if isinstance(poll_id, int):
@@ -62,8 +63,9 @@ def hide_poll(database: Session, _user: User, args: Arguments) -> Package:
 
     return error("type mismatch")
 
-    
+
 def show_poll(database: Session, _user: User, args: Arguments) -> Package:
+    "Show a poll from the database and format a response."
     poll_id = args.get("poll_id")
 
     if isinstance(poll_id, int):
