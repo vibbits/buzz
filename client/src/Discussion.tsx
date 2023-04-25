@@ -23,9 +23,7 @@ const CommentView: React.FC<CommentViewProps> = ({ text, user }) => {
   return (
     <div className="comment-container">
       <span className="comment-author">{user}</span>
-      <div className="comment">
-        <pre>{text}</pre>
-      </div>
+      <ReactMarkdown className="comment">{text}</ReactMarkdown>
     </div>
   );
 };

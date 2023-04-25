@@ -155,6 +155,15 @@ section.app-container {
   white-space: pre-wrap;
 }
 
+blockquote {
+  border-left: 3px solid #ccc;
+  padding: 0.2rem;
+}
+
+blockquote p {
+  display: inline;
+}
+
 hr.subtle-hr {
   width: 95%;
   border: 0;
