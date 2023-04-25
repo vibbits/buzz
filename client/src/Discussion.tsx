@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import rehypeHighlight from "rehype-highlight";
 
 import { Comment } from "./api";
 import "./Buzz.css";
@@ -92,7 +94,13 @@ export const Discussion: React.FC<React.PropsWithChildren<DiscussionProps>> = ({
   return (
     <div className="interaction-box discussion-box">
       {children}
-      <pre className="discussion-text">{text}</pre>
+
+      <ReactMarkdown
+        className="discussion-text"
+        rehypePlugins={[rehypeHighlight]}
+      >
+        {text}
+      </ReactMarkdown>
       <div style={{ margin: "auto 0", textAlign: "start" }}>{user}</div>
       <Votes votes={votes} vote={vote} />
       <CommentForm comment={comment} />
