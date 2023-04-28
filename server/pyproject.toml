@@ -22,7 +22,7 @@ hypercorn = "^0.14.3"
 black = "^23.1.0"
 pylint = "^2.17.0"
 mypy = "^1.1.1"
-uvicorn = "^0.21.1"
+uvicorn = "^0.22.0"
 
 [tool.poetry.scripts]
 setup = "app.database:build"
