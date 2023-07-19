@@ -68,7 +68,7 @@ print(settings.dict())
 
 
 def main() -> None:
-    "Launched with `poetry run start` at server root level (development only)"
+    "Launch with `poetry run start` at server root level (development only)"
     import uvicorn  # pylint: disable=import-outside-toplevel
 
     uvicorn.run("app.main:app", host="0.0.0.0", reload=True)

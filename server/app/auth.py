@@ -57,7 +57,7 @@ async def get_bearer_token(
             keys,
             audience="training_vote",
             access_token=tkn["access_token"],
-            options={"leeway": 30},
+            options={"leeway": 180},
         )
     except (ExpiredSignatureError, JWTClaimsError, JWTError) as err:
         raise HTTPException(
