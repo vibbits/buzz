@@ -9,7 +9,7 @@ packages = [{ include = "app" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-fastapi = "^0.95.0"
+fastapi = "^0.111.0"
 sqlalchemy = "^2.0.6"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 httpx = "^0.24.0"
