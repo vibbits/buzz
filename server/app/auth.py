@@ -33,10 +33,10 @@ async def login_redirect(redirect: str) -> RedirectResponse:
 
 
 def create_access_token(user: dict[str, str | int]) -> str:
-    "Create an access token for THIS API."
+    "Create an access token for this API."
     expire = datetime.now(timezone.utc) + timedelta(minutes=settings.api_token_expire)
     to_encode = user | {"exp": expire.timestamp()}
-    return jwt.encode(to_encode, settings.api_secret, "HS256")  # type: ignore[no-any-return]
+    return str(jwt.encode(to_encode, settings.api_secret, "HS256"))
 
 
 @router.post("/token")
